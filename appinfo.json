@@ -1,0 +1,68 @@
+{
+    "appKeys": {
+        "KEY_ALEC": 2,
+        "KEY_BATT": 8,
+        "KEY_COND": 7,
+        "KEY_HIGHTEMP": 5,
+        "KEY_LOWTEMP": 6,
+        "KEY_MELISSA": 3,
+        "KEY_SARAH": 1,
+        "KEY_TEMP": 4,
+        "KEY_ZACK": 0
+    },
+    "capabilities": [
+        "location"
+    ],
+    "companyName": "zachary.waser@gmail.com",
+    "enableMultiJS": true,
+    "longName": "zack_watchface",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "fonts/DIN_1451_Engschrift_15",
+                "name": "FONT_DIN_15",
+                "targetPlatforms": null,
+                "type": "font"
+            },
+            {
+                "characterRegex": "[0-9\u00b0| ]",
+                "file": "fonts/DIN_1451_Engschrift_20_Numbers",
+                "name": "FONT_DIN_20",
+                "targetPlatforms": null,
+                "type": "font"
+            },
+            {
+                "characterRegex": "[ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789!\"#$%^&'()*+]",
+                "file": "fonts/Meteocons",
+                "name": "FONT_METEOCONS_35",
+                "targetPlatforms": null,
+                "type": "font"
+            },
+            {
+                "file": "fonts/DIN_1451_Engschrift_25",
+                "name": "FONT_DIN_BOLD_25",
+                "targetPlatforms": null,
+                "type": "font"
+            },
+            {
+                "characterRegex": "[0-9:.]",
+                "file": "fonts/DIN_1451_Engschrift",
+                "name": "FONT_DIN_80",
+                "targetPlatforms": null,
+                "type": "font"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "zack_watchface",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "a10373ad-eca3-4666-80a3-f8069e2ae4eb",
+    "versionLabel": "1.2",
+    "watchapp": {
+        "watchface": true
+    }
+}
