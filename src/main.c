@@ -1,21 +1,29 @@
 //Zack's
 #include <pebble.h>
-#define KEY_ZACK 0
-#define KEY_SARAH 1
-#define KEY_ALEC 2
-#define KEY_MELISSA 3
+#define KEY_NAME1 0
+#define KEY_NAME2 1
+#define KEY_NAME3 2
+#define KEY_NAME4 3
 #define KEY_TEMP 4
 #define KEY_HIGHTEMP 5
 #define KEY_LOWTEMP 6
 #define KEY_COND 7
 #define KEY_BATT 8
+#define KEY_VALUE1 10
+#define KEY_VALUE2 11
+#define KEY_VALUE3 12
+#define KEY_VALUE4 13
+
+/*json file looks like
+{"batt":"","A":"1", "B":"1", "C":"0", D":"0"}
+*/
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 static TextLayer *s_people_layer;
-static TextLayer *s_zack_layer;
-static TextLayer *s_sarah_layer;
-static TextLayer *s_alec_layer;
-static TextLayer *s_melissa_layer;
+static TextLayer *s_name1_layer;
+static TextLayer *s_name2_layer;
+static TextLayer *s_name3_layer;
+static TextLayer *s_name4_layer;
 static TextLayer *s_date_layer;
 static TextLayer *s_temp_layer;
 static TextLayer *s_cond_layer;
@@ -27,260 +35,147 @@ static GFont s_people_font;
 static GFont s_weather_font;
 static GFont s_dinsmall_font;
 static GFont s_batt_font;
+
+static void set_all_text_layer(GColor color) {
+            text_layer_set_text_color(s_time_layer, color);
+            text_layer_set_text_color(s_date_layer, color);
+            text_layer_set_text_color(s_temp_layer, color);
+            text_layer_set_text_color(s_cond_layer, color);
+            text_layer_set_text_color(s_hilo_layer, color);
+            text_layer_set_text_color(s_batt_layer, color);
+}
+
+static void set_ppl(char *name_buffer, Tuple *name_tuple,  Tuple *value_tuple,  TextLayer *s_name_layer) {
+
+    static char value_buffer[2];
+    if (name_tuple && value_tuple) {
+      snprintf(name_buffer, sizeof(name_buffer), "%s", name_tuple->value->cstring);
+      snprintf(value_buffer, sizeof(value_buffer), "%s", value_tuple->value->cstring);
+
+      text_layer_set_text(s_name_layer, name_buffer);
+      
+      switch(value_buffer[0]) {
+            case '1':
+            text_layer_set_background_color(s_name_layer, GColorWhite);
+            text_layer_set_text_color(s_name_layer, GColorBlack);
+            break;
+            case '0':
+            text_layer_set_background_color(s_name_layer, GColorBlack);
+            text_layer_set_text_color(s_name_layer, GColorWhite);
+            break;
+        }
+    }
+  
+}
+
 //static GFont s_date_font;
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+    text_layer_set_text(s_shit_layer, "");
     // Store incoming information
-    static char zack_buffer[2];
-    static char sarah_buffer[2];
-    static char alec_buffer[2];
-    static char melissa_buffer[2];
     static char temp_buffer[6];
     static char hightemp_buffer[6];
     static char lowtemp_buffer[6];
     static char cond_buffer[64];
     static char hilo_buffer[16];
     static char batt_buffer[8];
+
     // Read tuples for data
-    Tuple *zack_tuple = dict_find(iterator, KEY_ZACK);
-    Tuple *sarah_tuple = dict_find(iterator, KEY_SARAH);
-    Tuple *alec_tuple = dict_find(iterator, KEY_ALEC);
-    Tuple *melissa_tuple = dict_find(iterator, KEY_MELISSA);
+    Tuple *name1_tuple = dict_find(iterator, KEY_NAME1);
+    Tuple *name2_tuple = dict_find(iterator, KEY_NAME2);
+    Tuple *name3_tuple = dict_find(iterator, KEY_NAME3);
+    Tuple *name4_tuple = dict_find(iterator, KEY_NAME4);
+    Tuple *value1_tuple = dict_find(iterator, KEY_VALUE1);
+    Tuple *value2_tuple = dict_find(iterator, KEY_VALUE2);
+    Tuple *value3_tuple = dict_find(iterator, KEY_VALUE3);
+    Tuple *value4_tuple = dict_find(iterator, KEY_VALUE4);
+  
+    static char name1_buffer[2];
+    static char name2_buffer[2];
+    static char name3_buffer[2];
+    static char name4_buffer[2];
+    set_ppl(name1_buffer, name1_tuple, value1_tuple, s_name1_layer);
+    set_ppl(name2_buffer, name2_tuple, value2_tuple, s_name2_layer);
+    set_ppl(name3_buffer, name3_tuple, value3_tuple, s_name3_layer);
+    set_ppl(name4_buffer, name4_tuple, value4_tuple, s_name4_layer);
+  
     Tuple *temp_tuple = dict_find(iterator, KEY_TEMP);
     Tuple *hightemp_tuple = dict_find(iterator, KEY_HIGHTEMP);
     Tuple *lowtemp_tuple = dict_find(iterator, KEY_LOWTEMP);
     Tuple *cond_tuple = dict_find(iterator, KEY_COND);
     Tuple *batt_tuple = dict_find(iterator, KEY_BATT);
-    // If all data is available, use it
-    if(zack_tuple && sarah_tuple && alec_tuple && melissa_tuple && batt_tuple && temp_tuple && hightemp_tuple && lowtemp_tuple && cond_tuple) {
-        snprintf(zack_buffer, sizeof(zack_buffer), "%s", zack_tuple->value->cstring);
-        snprintf(sarah_buffer, sizeof(sarah_buffer), "%s", sarah_tuple->value->cstring);
-        snprintf(alec_buffer, sizeof(alec_buffer), "%s", alec_tuple->value->cstring);
-        snprintf(melissa_buffer, sizeof(melissa_buffer), "%s", melissa_tuple->value->cstring);
-        snprintf(temp_buffer, sizeof(temp_buffer), "%d°", (int)temp_tuple->value->int32);
-        snprintf(hightemp_buffer, sizeof(hightemp_buffer), "%s", hightemp_tuple->value->cstring);
-        snprintf(lowtemp_buffer, sizeof(lowtemp_buffer), "%s", lowtemp_tuple->value->cstring);
-        snprintf(cond_buffer, sizeof(cond_buffer), "%s", cond_tuple->value->cstring);
-        snprintf(hilo_buffer, sizeof(hilo_buffer), "%d°\n%d°", (int)hightemp_tuple->value->int32, (int)lowtemp_tuple->value->int32);
-        snprintf(batt_buffer, sizeof(batt_buffer), "%s", batt_tuple->value->cstring);
-        switch(zack_buffer[0]) {
-            case '1':
-            text_layer_set_background_color(s_zack_layer, GColorWhite);
-            text_layer_set_text_color(s_zack_layer, GColorBlack);
-            break;
-            case '0':
-            text_layer_set_background_color(s_zack_layer, GColorBlack);
-            text_layer_set_text_color(s_zack_layer, GColorWhite);
-            break;
-        }
-        switch(sarah_buffer[0]) {
-            case '1':
-            text_layer_set_background_color(s_sarah_layer, GColorWhite);
-            text_layer_set_text_color(s_sarah_layer, GColorBlack);
-            break;
-            case '0':
-            text_layer_set_background_color(s_sarah_layer, GColorBlack);
-            text_layer_set_text_color(s_sarah_layer, GColorWhite);
-            break;
-        }
-        switch(alec_buffer[0]) {
-            case '1':
-            text_layer_set_background_color(s_alec_layer, GColorWhite);
-            text_layer_set_text_color(s_alec_layer, GColorBlack);
-            break;
-            case '0':
-            text_layer_set_background_color(s_alec_layer, GColorBlack);
-            text_layer_set_text_color(s_alec_layer, GColorWhite);
-            break;
-        }
-        switch(melissa_buffer[0]) {
-            case '1':
-            text_layer_set_background_color(s_melissa_layer, GColorWhite);
-            text_layer_set_text_color(s_melissa_layer, GColorBlack);
-            break;
-            case '0':
-            text_layer_set_background_color(s_melissa_layer, GColorBlack);
-            text_layer_set_text_color(s_melissa_layer, GColorWhite);
-            break;
-        }
-        if (strcmp(cond_buffer, "clear-day")==0) {
+
+
+    if(batt_tuple){
+      snprintf(batt_buffer, sizeof(batt_buffer), "%s", batt_tuple->value->cstring);
+      text_layer_set_text(s_batt_layer, batt_buffer);
+    }
+  
+    if (cond_tuple){
+      snprintf(cond_buffer, sizeof(cond_buffer), "%s", cond_tuple->value->cstring);
+      if (strcmp(cond_buffer, "clear-day")==0) {
             text_layer_set_text(s_cond_layer, "1");
             window_set_background_color(s_main_window, GColorBabyBlueEyes);
-            text_layer_set_text_color(s_time_layer, GColorWhite);
-            text_layer_set_text_color(s_date_layer, GColorWhite);
-            text_layer_set_text_color(s_temp_layer, GColorWhite);
-            text_layer_set_text_color(s_cond_layer, GColorWhite);
-            text_layer_set_text_color(s_hilo_layer, GColorWhite);
-            text_layer_set_text_color(s_batt_layer, GColorWhite);
+            set_all_text_layer(GColorWhite);
         }
         else if (strcmp(cond_buffer, "partly-cloudy-day")==0) {
             text_layer_set_text(s_cond_layer, "3");
             window_set_background_color(s_main_window, GColorBlue);
-            text_layer_set_text_color(s_time_layer, GColorLightGray);
-            text_layer_set_text_color(s_date_layer, GColorLightGray);
-            text_layer_set_text_color(s_temp_layer, GColorLightGray);
-            text_layer_set_text_color(s_cond_layer, GColorLightGray);
-            text_layer_set_text_color(s_hilo_layer, GColorLightGray);
-            text_layer_set_text_color(s_batt_layer, GColorLightGray);
+            set_all_text_layer(GColorLightGray);
         }
         else if (strcmp(cond_buffer, "cloudy")==0) {
             text_layer_set_text(s_cond_layer, "5");
             window_set_background_color(s_main_window, GColorDarkGray);
-            text_layer_set_text_color(s_time_layer, GColorWhite);
-            text_layer_set_text_color(s_date_layer, GColorWhite);
-            text_layer_set_text_color(s_temp_layer, GColorWhite);
-            text_layer_set_text_color(s_cond_layer, GColorWhite);
-            text_layer_set_text_color(s_hilo_layer, GColorWhite);
-            text_layer_set_text_color(s_batt_layer, GColorWhite);
+            set_all_text_layer(GColorWhite);
         }
         else if (strcmp(cond_buffer, "clear-night")==0) {
             text_layer_set_text(s_cond_layer, "2");
             window_set_background_color(s_main_window, GColorOxfordBlue);
-            text_layer_set_text_color(s_time_layer, GColorWhite);
-            text_layer_set_text_color(s_date_layer, GColorWhite);
-            text_layer_set_text_color(s_temp_layer, GColorWhite);
-            text_layer_set_text_color(s_cond_layer, GColorWhite);
-            text_layer_set_text_color(s_hilo_layer, GColorWhite);
-            text_layer_set_text_color(s_batt_layer, GColorWhite);
+            set_all_text_layer(GColorWhite);
         }
         else if (strcmp(cond_buffer, "rain")==0) {
             text_layer_set_text(s_cond_layer, "8");
             window_set_background_color(s_main_window, GColorOxfordBlue);
-            text_layer_set_text_color(s_time_layer, GColorPictonBlue);
-            text_layer_set_text_color(s_date_layer, GColorPictonBlue);
-            text_layer_set_text_color(s_temp_layer, GColorPictonBlue);
-            text_layer_set_text_color(s_cond_layer, GColorPictonBlue);
-            text_layer_set_text_color(s_hilo_layer, GColorPictonBlue);
-            text_layer_set_text_color(s_batt_layer, GColorPictonBlue);
+            set_all_text_layer(GColorPictonBlue);
         }
         else if (strcmp(cond_buffer, "snow")==0) {
             text_layer_set_text(s_cond_layer, "#");
             window_set_background_color(s_main_window, GColorWhite);
-            text_layer_set_text_color(s_time_layer, GColorPictonBlue);
-            text_layer_set_text_color(s_date_layer, GColorPictonBlue);
-            text_layer_set_text_color(s_temp_layer, GColorPictonBlue);
-            text_layer_set_text_color(s_cond_layer, GColorPictonBlue);
-            text_layer_set_text_color(s_hilo_layer, GColorPictonBlue);
-            text_layer_set_text_color(s_batt_layer, GColorPictonBlue);
+            set_all_text_layer(GColorPictonBlue);
         }
         else if (strcmp(cond_buffer, "sleet")==0) {
             text_layer_set_text(s_cond_layer, "$");
             window_set_background_color(s_main_window, GColorCeleste);
-            text_layer_set_text_color(s_time_layer, GColorBlue);
-            text_layer_set_text_color(s_date_layer, GColorBlue);
-            text_layer_set_text_color(s_temp_layer, GColorBlue);
-            text_layer_set_text_color(s_cond_layer, GColorBlue);
-            text_layer_set_text_color(s_hilo_layer, GColorBlue);
-            text_layer_set_text_color(s_batt_layer, GColorBlue);
+            set_all_text_layer(GColorBlue);
         }
         else if (strcmp(cond_buffer, "wind")==0) {
             text_layer_set_text(s_cond_layer, "F");
             window_set_background_color(s_main_window, GColorWhite);
-            text_layer_set_text_color(s_time_layer, GColorBlack);
-            text_layer_set_text_color(s_date_layer, GColorBlack);
-            text_layer_set_text_color(s_temp_layer, GColorBlack);
-            text_layer_set_text_color(s_cond_layer, GColorBlack);
-            text_layer_set_text_color(s_hilo_layer, GColorBlack);
-            text_layer_set_text_color(s_batt_layer, GColorBlack);
+            set_all_text_layer(GColorBlack);
         }
         else if (strcmp(cond_buffer, "fog")==0) {
             text_layer_set_text(s_cond_layer, "M");
             window_set_background_color(s_main_window, GColorLightGray);
-            text_layer_set_text_color(s_time_layer, GColorBlack);
-            text_layer_set_text_color(s_date_layer, GColorBlack);
-            text_layer_set_text_color(s_temp_layer, GColorBlack);
-            text_layer_set_text_color(s_cond_layer, GColorBlack);
-            text_layer_set_text_color(s_hilo_layer, GColorBlack);
-            text_layer_set_text_color(s_batt_layer, GColorBlack);
+            set_all_text_layer(GColorBlack);
         }
         else if (strcmp(cond_buffer, "partly-cloudy-night")==0) {
             text_layer_set_text(s_cond_layer, "4");
             window_set_background_color(s_main_window, GColorOxfordBlue);
-            text_layer_set_text_color(s_time_layer, GColorLightGray);
-            text_layer_set_text_color(s_date_layer, GColorLightGray);
-            text_layer_set_text_color(s_temp_layer, GColorLightGray);
-            text_layer_set_text_color(s_cond_layer, GColorLightGray);
-            text_layer_set_text_color(s_hilo_layer, GColorLightGray);
-            text_layer_set_text_color(s_batt_layer, GColorLightGray);
+            set_all_text_layer(GColorLightGray);
         }
         else {
             text_layer_set_text(s_cond_layer, ")");
         }
-        text_layer_set_text(s_temp_layer, temp_buffer);
+    }
+    if(temp_tuple){
+      snprintf(temp_buffer, sizeof(temp_buffer), "%d°", (int)temp_tuple->value->int32);
+      text_layer_set_text(s_temp_layer, temp_buffer);
+    }
+    // If all data is available, use it
+    if(hightemp_tuple && lowtemp_tuple) {
+        snprintf(hightemp_buffer, sizeof(hightemp_buffer), "%s", hightemp_tuple->value->cstring);
+        snprintf(lowtemp_buffer, sizeof(lowtemp_buffer), "%s", lowtemp_tuple->value->cstring);
+        snprintf(hilo_buffer, sizeof(hilo_buffer), "%d°\n%d°", (int)hightemp_tuple->value->int32, (int)lowtemp_tuple->value->int32);
         text_layer_set_text(s_hilo_layer, hilo_buffer);
-        text_layer_set_text(s_batt_layer, batt_buffer);
-        text_layer_set_text(s_shit_layer, "");
-        text_layer_set_text(s_zack_layer, "Z");
-        text_layer_set_text(s_sarah_layer, "S");
-        text_layer_set_text(s_alec_layer, "A");
-        text_layer_set_text(s_melissa_layer, "M");
-    }
-    //if we only have people data
-    else if(zack_tuple && sarah_tuple && alec_tuple && melissa_tuple && batt_tuple) {
-        snprintf(zack_buffer, sizeof(zack_buffer), "%s", zack_tuple->value->cstring);
-        snprintf(sarah_buffer, sizeof(sarah_buffer), "%s", sarah_tuple->value->cstring);
-        snprintf(alec_buffer, sizeof(alec_buffer), "%s", alec_tuple->value->cstring);
-        snprintf(melissa_buffer, sizeof(melissa_buffer), "%s", melissa_tuple->value->cstring);
-        snprintf(batt_buffer, sizeof(batt_buffer), "%s", batt_tuple->value->cstring);
-        switch(zack_buffer[0]) {
-            case '1':
-            text_layer_set_background_color(s_zack_layer, GColorWhite);
-            text_layer_set_text_color(s_zack_layer, GColorBlack);
-            break;
-            case '0':
-            text_layer_set_background_color(s_zack_layer, GColorBlack);
-            text_layer_set_text_color(s_zack_layer, GColorWhite);
-            break;
-        }
-        switch(sarah_buffer[0]) {
-            case '1':
-            text_layer_set_background_color(s_sarah_layer, GColorWhite);
-            text_layer_set_text_color(s_sarah_layer, GColorBlack);
-            break;
-            case '0':
-            text_layer_set_background_color(s_sarah_layer, GColorBlack);
-            text_layer_set_text_color(s_sarah_layer, GColorWhite);
-            break;
-        }
-        switch(alec_buffer[0]) {
-            case '1':
-            text_layer_set_background_color(s_alec_layer, GColorWhite);
-            text_layer_set_text_color(s_alec_layer, GColorBlack);
-            break;
-            case '0':
-            text_layer_set_background_color(s_alec_layer, GColorBlack);
-            text_layer_set_text_color(s_alec_layer, GColorWhite);
-            break;
-        }
-        switch(melissa_buffer[0]) {
-            case '1':
-            text_layer_set_background_color(s_melissa_layer, GColorWhite);
-            text_layer_set_text_color(s_melissa_layer, GColorBlack);
-            break;
-            case '0':
-            text_layer_set_background_color(s_melissa_layer, GColorBlack);
-            text_layer_set_text_color(s_melissa_layer, GColorWhite);
-            break;
-        }
-        window_set_background_color(s_main_window, GColorWindsorTan);
-        text_layer_set_text(s_shit_layer, "\U0001F4A9");
-        text_layer_set_text(s_batt_layer, batt_buffer);
-        text_layer_set_text(s_zack_layer, "Z");
-        text_layer_set_text(s_sarah_layer, "S");
-        text_layer_set_text(s_alec_layer, "A");
-        text_layer_set_text(s_melissa_layer, "M");
-    }
-    else {
-        window_set_background_color(s_main_window, GColorWindsorTan);
-        text_layer_set_text(s_shit_layer, "\U0001F4A9");
-        text_layer_set_background_color(s_people_layer, GColorClear);
-        text_layer_set_text(s_zack_layer, "");
-        text_layer_set_text(s_sarah_layer, "");
-        text_layer_set_text(s_alec_layer, "");
-        text_layer_set_text(s_melissa_layer, "");
-        text_layer_set_background_color(s_zack_layer, GColorClear);
-        text_layer_set_background_color(s_sarah_layer, GColorClear);
-        text_layer_set_background_color(s_alec_layer, GColorClear);
-        text_layer_set_background_color(s_melissa_layer, GColorClear);
     }
 }
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -311,7 +206,7 @@ static void update_time() {
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     update_time();
     // Get weather update every 5 minutes
-    if(tick_time->tm_min % 10 == 0) {
+    if(tick_time->tm_min % 5 == 0) {
         // Begin dictionary
         DictionaryIterator *iter;
         app_message_outbox_begin(&iter);
@@ -321,6 +216,15 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
         app_message_outbox_send();
     }
 }
+
+static void create_ppl_layer(TextLayer *s_name_layer) {
+    text_layer_set_background_color(s_name_layer, GColorBlack);
+    text_layer_set_text_color(s_name_layer, GColorWhite);
+    text_layer_set_text_alignment(s_name_layer, GTextAlignmentCenter);
+    text_layer_set_text(s_name_layer, "");
+    text_layer_set_font(s_name_layer, s_people_font);
+}
+
 static void main_window_load(Window *window) {
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
@@ -356,41 +260,27 @@ static void main_window_load(Window *window) {
     text_layer_set_font(s_people_layer, s_people_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_people_layer));
     //create Zack's Layer
-    s_zack_layer = text_layer_create(
+  
+    s_name1_layer = text_layer_create(
     GRect(0, 0, 30, 30));
-    text_layer_set_background_color(s_zack_layer, GColorBlack);
-    text_layer_set_text_color(s_zack_layer, GColorWhite);
-    text_layer_set_text_alignment(s_zack_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_zack_layer, "Z");
-    text_layer_set_font(s_zack_layer, s_people_font);
-    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_zack_layer));
+    create_ppl_layer(s_name1_layer);
+    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name1_layer));
     //create Sarah's Layer
-    s_sarah_layer = text_layer_create(
-    GRect(35, 0, 30, 30));
-    text_layer_set_background_color(s_sarah_layer, GColorBlack);
-    text_layer_set_text_color(s_sarah_layer, GColorWhite);
-    text_layer_set_text_alignment(s_sarah_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_sarah_layer, "S");
-    text_layer_set_font(s_sarah_layer, s_people_font);
-    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_sarah_layer));
-    //create Alec's Layer
-    s_alec_layer = text_layer_create(
-    GRect(79, 0, 30, 30));
-    text_layer_set_background_color(s_alec_layer, GColorBlack);
-    text_layer_set_text_color(s_alec_layer, GColorWhite);
-    text_layer_set_text_alignment(s_alec_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_alec_layer, "A");
-    text_layer_set_font(s_alec_layer, s_people_font);
-    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_alec_layer));
-    //create Melissa's Layer
-    s_melissa_layer = text_layer_create(
+    s_name2_layer = text_layer_create(
     GRect(114, 0, 30, 30));
-    text_layer_set_background_color(s_melissa_layer, GColorBlack);
-    text_layer_set_text_color(s_melissa_layer, GColorWhite);
-    text_layer_set_text_alignment(s_melissa_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_melissa_layer, "M");
-    text_layer_set_font(s_melissa_layer, s_people_font);
-    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_melissa_layer));
+    create_ppl_layer(s_name2_layer);
+    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name2_layer));
+    //create Alec's Layer
+    s_name3_layer = text_layer_create(
+    GRect(35, 0, 30, 30));
+    create_ppl_layer(s_name3_layer);
+    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name3_layer));
+    //create Melissa's Layer
+    s_name4_layer = text_layer_create(
+    GRect(79, 0, 30, 30));
+    create_ppl_layer(s_name4_layer);
+    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name4_layer));
+    
     //create temperature Layer
     s_temp_layer = text_layer_create(
     GRect(10, 90, 50, 30));
@@ -447,10 +337,10 @@ static void main_window_unload(Window *window) {
     // Destroy text layers
     text_layer_destroy(s_time_layer);
     text_layer_destroy(s_date_layer);
-		text_layer_destroy(s_zack_layer);
-    text_layer_destroy(s_sarah_layer);
-    text_layer_destroy(s_alec_layer);
-    text_layer_destroy(s_melissa_layer);
+		text_layer_destroy(s_name1_layer);
+    text_layer_destroy(s_name2_layer);
+    text_layer_destroy(s_name3_layer);
+    text_layer_destroy(s_name4_layer);
     text_layer_destroy(s_temp_layer);
     text_layer_destroy(s_cond_layer);
     text_layer_destroy(s_hilo_layer);
@@ -484,3 +374,4 @@ int main(void) {
     app_event_loop();
     deinit();
 }
+

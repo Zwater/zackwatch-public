@@ -1,14 +1,18 @@
 {
     "appKeys": {
-        "KEY_ALEC": 2,
         "KEY_BATT": 8,
         "KEY_COND": 7,
         "KEY_HIGHTEMP": 5,
         "KEY_LOWTEMP": 6,
-        "KEY_MELISSA": 3,
-        "KEY_SARAH": 1,
+        "KEY_NAME1": 0,
+        "KEY_NAME2": 1,
+        "KEY_NAME3": 2,
+        "KEY_NAME4": 3,
         "KEY_TEMP": 4,
-        "KEY_ZACK": 0
+        "KEY_VALUE1": 10,
+        "KEY_VALUE2": 11,
+        "KEY_VALUE3": 12,
+        "KEY_VALUE4": 13
     },
     "capabilities": [
         "location"
@@ -20,8 +24,15 @@
     "resources": {
         "media": [
             {
-                "file": "fonts/DIN_1451_Engschrift_15",
-                "name": "FONT_DIN_15",
+                "characterRegex": "[ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789!\"#$%^&'()*+]",
+                "file": "fonts/Meteocons",
+                "name": "FONT_METEOCONS_35",
+                "targetPlatforms": null,
+                "type": "font"
+            },
+            {
+                "file": "fonts/DIN_1451_Engschrift_25",
+                "name": "FONT_DIN_BOLD_25",
                 "targetPlatforms": null,
                 "type": "font"
             },
@@ -33,15 +44,8 @@
                 "type": "font"
             },
             {
-                "characterRegex": "[ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789!\"#$%^&'()*+]",
-                "file": "fonts/Meteocons",
-                "name": "FONT_METEOCONS_35",
-                "targetPlatforms": null,
-                "type": "font"
-            },
-            {
-                "file": "fonts/DIN_1451_Engschrift_25",
-                "name": "FONT_DIN_BOLD_25",
+                "file": "fonts/DIN_1451_Engschrift_15",
+                "name": "FONT_DIN_15",
                 "targetPlatforms": null,
                 "type": "font"
             },
