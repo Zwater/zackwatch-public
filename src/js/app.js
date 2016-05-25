@@ -1,9 +1,17 @@
-var myAPIKey = 'CHANGE_THIS_BEFORE_USE';
-var sarah;
-var melissa;
-var alec;
-var zack;
+/*json file looks like
+{"batt":"","A":"1", "B":"1", "C":"0", D":"0"}
+up to 4 entries, remove any not required ie
+{"batt":"","A":"1"} 
+*/
+var myAPIKey = 'FORCAST IO API';
+var mypplurl = 'URL OF JSON';
+var latitude = -30.123;
+var longitude = 142.111;
+var defaultlocOnly = true;
+var metric = false;
+
 var batt;
+
 var xhrRequest = function(url, type, callback) {
   var xhr = new XMLHttpRequest();
   xhr.onload = function() {
@@ -13,33 +21,44 @@ var xhrRequest = function(url, type, callback) {
   xhr.send();
 };
 
+function convert(val) {
+  if (metric) {
+    var out = (val-32)/1.8;
+    return out;
+  }
+}
+
 function locFailure() {
-  console.log('getting people!');
-  var url = 'URL_OF_JSON_STRING';
-  xhrRequest(url, 'GET',
+  if (latitude && longitude){
+    getPeople(latitude, longitude, true);
+  } else {
+    getPeople(latitude, longitude, false);
+  }
+}
+
+function locSuccess(pos) {
+  getPeople(pos.coords.latitude, pos.coords.longitude,true);
+}
+
+function getPeople(latitude, longitude, weather) {
+
+  console.log('getting people and weather!');
+  xhrRequest(mypplurl, 'GET',
     function(responseText) {
       var ppljson = JSON.parse(responseText);
-      sarah = ppljson.sarah;
-      melissa = ppljson.melissa;
-      alec = ppljson.alec;
-      zack = ppljson.zack;
+      var dictionary = {};
+      for (var i=1; i<Object.keys(ppljson).length; i++) {
+        var name = Object.keys(ppljson)[i];
+        dictionary["KEY_NAME"+i] = name;
+        var val = ppljson[Object.keys(ppljson)[i]];
+        dictionary["KEY_VALUE"+i] = val;
+        console.log(name + ':' + val);
+      }
       batt = ppljson.batt;
       console.log('got people');
-      console.log(sarah);
-      console.log(melissa);
-      console.log(alec);
-      console.log(zack);
       console.log(batt);
-      // Assemble dictionary using our keys
-      var dictionary = {
-        "KEY_ZACK": zack,
-        "KEY_SARAH": sarah,
-        "KEY_ALEC": alec,
-        "KEY_MELISSA": melissa,
-        "KEY_BATT": batt
-      };
 
-      console.log(dictionary);
+      //console.log(dictionary);
       Pebble.sendAppMessage(dictionary,
         function(e) {
           console.log('People info sent to Pebble successfully!');
@@ -51,35 +70,12 @@ function locFailure() {
       );
     }
   );
-}
-
-function getPeople(pos) {
-
-  console.log('getting people and weather!');
-  var url = 'URL_OF_JSON_STRING';
-  xhrRequest(url, 'GET',
-    function(responseText) {
-      var ppljson = JSON.parse(responseText);
-      sarah = ppljson.sarah;
-      melissa = ppljson.melissa;
-      alec = ppljson.alec;
-      zack = ppljson.zack;
-      batt = ppljson.batt;
-      console.log('got people');
-      console.log(sarah);
-      console.log(melissa);
-      console.log(alec);
-      console.log(zack);
-      console.log(batt);
-
-    }
-  );
-
+  if (weather) {
   // Construct URL
   //var url = 'https://api.forecast.io/forecast/' +
   // myAPIKey + '/' pos.coords.latitude + ',' + pos.coords.longitude + '?exclude=minutely,hourly,alerts,flags';
   var url = 'https://api.forecast.io/forecast/' +
-    myAPIKey + '/' + pos.coords.latitude + ',' + pos.coords.longitude;
+    myAPIKey + '/' + latitude + ',' + longitude;
 
   // Send request to Forecast.io
   xhrRequest(url, 'GET',
@@ -87,7 +83,6 @@ function getPeople(pos) {
       // responseText contains a JSON object with weather info
       console.log(responseText);
       var json = JSON.parse(responseText);
-
       // Temperature, current, high, and low
       var temperature = json.currently.temperature;
       console.log('Temperature is ' + temperature);
@@ -95,47 +90,47 @@ function getPeople(pos) {
       console.log(' High Temperature is ' + highTemperature);
       var lowTemperature = json.daily.data[0].temperatureMin;
       console.log(' High Temperature is ' + lowTemperature);
+      var precip = json.daily.data[0].precipProbability * 100;
+      console.log(' Precip Prob is '+ precip);
       // Conditions
       var conditions = json.currently.icon;
       console.log('Conditions are ' + conditions);
-
+    
       var dictionary = {
-        "KEY_ZACK": zack,
-        "KEY_SARAH": sarah,
-        "KEY_ALEC": alec,
-        "KEY_MELISSA": melissa,
-        "KEY_BATT": batt,
-        "KEY_TEMP": temperature,
-        "KEY_HIGHTEMP": highTemperature,
-        "KEY_LOWTEMP": lowTemperature,
+        "KEY_TEMP": convert(temperature),
+        "KEY_HIGHTEMP": convert(highTemperature),
+        "KEY_LOWTEMP": convert(lowTemperature),
         "KEY_COND": conditions
       };
-      console.log(dictionary);
+      //console.log(dictionary);
       Pebble.sendAppMessage(dictionary,
         function(e) {
-          console.log('People info sent to Pebble successfully!');
+          console.log('Weather info sent to Pebble successfully!');
         },
 
         function(e) {
-          console.log('Error sending people info to Pebble!');
+          console.log('Error sending weather info to Pebble!');
         }
       );
     }
   );
+  }
 }
 
-//function locationError(err) {
-//  console.log("Error requesting location!");
-//}
 
 function getWeather() {
-  navigator.geolocation.getCurrentPosition(
-    getPeople,
-    locFailure, {
-      timeout: 15000,
-      maximumAge: 0
-    }
-  );
+  if (defaultlocOnly) {
+    getPeople(latitude, longitude, true);
+  } else {
+    navigator.geolocation.getCurrentPosition(
+      locSuccess,
+      locFailure, {
+        timeout: 15000,
+        maximumAge: 0
+      }
+    );
+  }
+  
 }
 
 // Listen for when the watchface is opened
