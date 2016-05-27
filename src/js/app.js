@@ -1,7 +1,7 @@
 /*json file looks like
-{"batt":"","A":"1", "B":"1", "C":"0", D":"0"}
+{"A":"1", "B":"1", "C":"0", D":"0"}
 up to 4 entries, remove any not required ie
-{"batt":"","A":"1"} 
+{"A":"1"} 
 */
 var myAPIKey = 'FORCAST IO API';
 var mypplurl = 'URL OF JSON';
@@ -9,8 +9,6 @@ var latitude = -30.123;
 var longitude = 142.111;
 var defaultlocOnly = true;
 var metric = false;
-
-var batt;
 
 var xhrRequest = function(url, type, callback) {
   var xhr = new XMLHttpRequest();
@@ -47,16 +45,14 @@ function getPeople(latitude, longitude, weather) {
     function(responseText) {
       var ppljson = JSON.parse(responseText);
       var dictionary = {};
-      for (var i=1; i<Object.keys(ppljson).length; i++) {
+      for (var i=0; i<Object.keys(ppljson).length; i++) {
         var name = Object.keys(ppljson)[i];
-        dictionary["KEY_NAME"+i] = name;
+        dictionary["KEY_NAME"+(i+1)] = name;
         var val = ppljson[Object.keys(ppljson)[i]];
-        dictionary["KEY_VALUE"+i] = val;
+        dictionary["KEY_VALUE"+(i+1)] = val;
         console.log(name + ':' + val);
       }
-      batt = ppljson.batt;
       console.log('got people');
-      console.log(batt);
 
       //console.log(dictionary);
       Pebble.sendAppMessage(dictionary,
@@ -151,3 +147,4 @@ Pebble.addEventListener('appmessage',
 
   }
 );
+
