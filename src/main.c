@@ -15,8 +15,10 @@
 #define KEY_VALUE4 13
 
 /*json file looks like
-{"batt":"","A":"1", "B":"1", "C":"0", D":"0"}
+{A":"1", "B":"1", "C":"0", D":"0"}
 */
+static bool s_vibrate = true;
+static int s_interval = 5;
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 static TextLayer *s_people_layer;
@@ -35,6 +37,8 @@ static GFont s_people_font;
 static GFont s_weather_font;
 static GFont s_dinsmall_font;
 static GFont s_batt_font;
+static char s_ppl[] = {'0','0','0','0'};
+static bool s_changed = false;
 
 static void set_all_text_layer(GColor color) {
             text_layer_set_text_color(s_time_layer, color);
@@ -45,7 +49,7 @@ static void set_all_text_layer(GColor color) {
             text_layer_set_text_color(s_batt_layer, color);
 }
 
-static void set_ppl(char *name_buffer, Tuple *name_tuple,  Tuple *value_tuple,  TextLayer *s_name_layer) {
+static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value_tuple,  TextLayer *s_name_layer) {
 
     static char value_buffer[2];
     if (name_tuple && value_tuple) {
@@ -56,16 +60,26 @@ static void set_ppl(char *name_buffer, Tuple *name_tuple,  Tuple *value_tuple,  
       
       switch(value_buffer[0]) {
             case '1':
-            text_layer_set_background_color(s_name_layer, GColorWhite);
-            text_layer_set_text_color(s_name_layer, GColorBlack);
+            if (s_ppl[ppl] == '0') { 
+              text_layer_set_background_color(s_name_layer, GColorWhite);
+              text_layer_set_text_color(s_name_layer, GColorBlack);
+              s_changed = true;
+            }
             break;
             case '0':
-            text_layer_set_background_color(s_name_layer, GColorBlack);
-            text_layer_set_text_color(s_name_layer, GColorWhite);
+            if (s_ppl[ppl] == '1') { 
+              text_layer_set_background_color(s_name_layer, GColorBlack);
+              text_layer_set_text_color(s_name_layer, GColorWhite);
+              s_changed = true;
+            }
             break;
         }
     }
   
+}
+
+static void bluetooth_callback(bool connected) {
+  vibes_double_pulse();
 }
 
 //static GFont s_date_font;
@@ -78,7 +92,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     static char cond_buffer[64];
     static char hilo_buffer[16];
     static char batt_buffer[8];
-
+  
     // Read tuples for data
     Tuple *name1_tuple = dict_find(iterator, KEY_NAME1);
     Tuple *name2_tuple = dict_find(iterator, KEY_NAME2);
@@ -93,11 +107,17 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     static char name2_buffer[2];
     static char name3_buffer[2];
     static char name4_buffer[2];
-    set_ppl(name1_buffer, name1_tuple, value1_tuple, s_name1_layer);
-    set_ppl(name2_buffer, name2_tuple, value2_tuple, s_name2_layer);
-    set_ppl(name3_buffer, name3_tuple, value3_tuple, s_name3_layer);
-    set_ppl(name4_buffer, name4_tuple, value4_tuple, s_name4_layer);
   
+    set_ppl(1,name1_buffer, name1_tuple, value1_tuple, s_name1_layer);
+    set_ppl(2,name2_buffer, name2_tuple, value2_tuple, s_name2_layer);
+    set_ppl(3,name3_buffer, name3_tuple, value3_tuple, s_name3_layer);
+    set_ppl(4,name4_buffer, name4_tuple, value4_tuple, s_name4_layer);
+    if(s_changed){
+      s_changed = false;
+      if(s_vibrate){
+        vibes_double_pulse();
+      }
+    }
     Tuple *temp_tuple = dict_find(iterator, KEY_TEMP);
     Tuple *hightemp_tuple = dict_find(iterator, KEY_HIGHTEMP);
     Tuple *lowtemp_tuple = dict_find(iterator, KEY_LOWTEMP);
@@ -205,8 +225,8 @@ static void update_time() {
 }
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     update_time();
-    // Get weather update every 5 minutes
-    if(tick_time->tm_min % 5 == 0) {
+    // Get weather update every x minutes
+    if(tick_time->tm_min % s_interval == 0) {
         // Begin dictionary
         DictionaryIterator *iter;
         app_message_outbox_begin(&iter);
@@ -365,6 +385,13 @@ static void init() {
     app_message_register_outbox_failed(outbox_failed_callback);
     app_message_register_outbox_sent(outbox_sent_callback);
     app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  
+    // Register for Bluetooth connection updates
+    if (s_vibrate) {
+      connection_service_subscribe((ConnectionHandlers) {
+        .pebble_app_connection_handler = bluetooth_callback
+      });
+    }
 }
 static void deinit() {
     window_destroy(s_main_window);
@@ -374,4 +401,3 @@ int main(void) {
     app_event_loop();
     deinit();
 }
-
