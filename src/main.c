@@ -64,6 +64,7 @@ static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value
               text_layer_set_background_color(s_name_layer, GColorWhite);
               text_layer_set_text_color(s_name_layer, GColorBlack);
               s_changed = true;
+              s_ppl[ppl] = '1';
             }
             break;
             case '0':
@@ -71,6 +72,7 @@ static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value
               text_layer_set_background_color(s_name_layer, GColorBlack);
               text_layer_set_text_color(s_name_layer, GColorWhite);
               s_changed = true;
+              s_ppl[ppl] = '2';
             }
             break;
         }
