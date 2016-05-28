@@ -41,12 +41,12 @@ static GFont s_batt_font;
 static char s_ppl[] = {'0','0','0','0'};
 static bool s_changed = false;
 static void set_all_text_layer(GColor color) {
-            text_layer_set_text_color(s_time_layer, COLOR_FALLBACK(color, GColorBlack));
-            text_layer_set_text_color(s_date_layer, COLOR_FALLBACK(color, GColorBlack));
-            text_layer_set_text_color(s_temp_layer, COLOR_FALLBACK(color, GColorBlack));
-            text_layer_set_text_color(s_cond_layer, COLOR_FALLBACK(color, GColorBlack));
-            text_layer_set_text_color(s_hilo_layer, COLOR_FALLBACK(color, GColorBlack));
-            text_layer_set_text_color(s_batt_layer, COLOR_FALLBACK(color, GColorBlack));
+            text_layer_set_text_color(s_time_layer, COLOR_FALLBACK(color, GColorWhite));
+            text_layer_set_text_color(s_date_layer, COLOR_FALLBACK(color, GColorWhite));
+            text_layer_set_text_color(s_temp_layer, COLOR_FALLBACK(color, GColorWhite));
+            text_layer_set_text_color(s_cond_layer, COLOR_FALLBACK(color, GColorWhite));
+            text_layer_set_text_color(s_hilo_layer, COLOR_FALLBACK(color, GColorWhite));
+            text_layer_set_text_color(s_batt_layer, COLOR_FALLBACK(color, GColorWhite));
 }
 
 static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value_tuple,  TextLayer *s_name_layer) {

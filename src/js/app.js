@@ -3,11 +3,11 @@
 up to 4 entries, remove any not required ie
 {"A":"1"} 
 */
-var myAPIKey = 'forecast_ip_api';
+var myAPIKey = 'forecast_io_api';
 var mypplurl = 'ppl_server';
 var latitude = -30.123;
 var longitude = 142.111;
-var defaultlocOnly = true;
+var defaultlocOnly = false;
 var metric = false;
 
 var xhrRequest = function(url, type, callback) {
