@@ -19,6 +19,7 @@
 */
 static bool s_vibrate = true;
 static int s_interval = 5;
+//Change these if you want black on white with OG pebble/steel
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 static TextLayer *s_people_layer;
@@ -39,14 +40,13 @@ static GFont s_dinsmall_font;
 static GFont s_batt_font;
 static char s_ppl[] = {'0','0','0','0'};
 static bool s_changed = false;
-
 static void set_all_text_layer(GColor color) {
-            text_layer_set_text_color(s_time_layer, color);
-            text_layer_set_text_color(s_date_layer, color);
-            text_layer_set_text_color(s_temp_layer, color);
-            text_layer_set_text_color(s_cond_layer, color);
-            text_layer_set_text_color(s_hilo_layer, color);
-            text_layer_set_text_color(s_batt_layer, color);
+            text_layer_set_text_color(s_time_layer, COLOR_FALLBACK(color, GColorBlack));
+            text_layer_set_text_color(s_date_layer, COLOR_FALLBACK(color, GColorBlack));
+            text_layer_set_text_color(s_temp_layer, COLOR_FALLBACK(color, GColorBlack));
+            text_layer_set_text_color(s_cond_layer, COLOR_FALLBACK(color, GColorBlack));
+            text_layer_set_text_color(s_hilo_layer, COLOR_FALLBACK(color, GColorBlack));
+            text_layer_set_text_color(s_batt_layer, COLOR_FALLBACK(color, GColorBlack));
 }
 
 static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value_tuple,  TextLayer *s_name_layer) {
@@ -135,52 +135,52 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       snprintf(cond_buffer, sizeof(cond_buffer), "%s", cond_tuple->value->cstring);
       if (strcmp(cond_buffer, "clear-day")==0) {
             text_layer_set_text(s_cond_layer, "1");
-            window_set_background_color(s_main_window, GColorBabyBlueEyes);
+            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorBabyBlueEyes, GColorBlack));
             set_all_text_layer(GColorWhite);
         }
         else if (strcmp(cond_buffer, "partly-cloudy-day")==0) {
             text_layer_set_text(s_cond_layer, "3");
-            window_set_background_color(s_main_window, GColorBlue);
+            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorBlue, GColorBlack));
             set_all_text_layer(GColorLightGray);
         }
         else if (strcmp(cond_buffer, "cloudy")==0) {
             text_layer_set_text(s_cond_layer, "5");
-            window_set_background_color(s_main_window, GColorDarkGray);
+            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorDarkGray, GColorBlack));
             set_all_text_layer(GColorWhite);
         }
         else if (strcmp(cond_buffer, "clear-night")==0) {
             text_layer_set_text(s_cond_layer, "2");
-            window_set_background_color(s_main_window, GColorOxfordBlue);
+            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorOxfordBlue, GColorBlack));
             set_all_text_layer(GColorWhite);
         }
         else if (strcmp(cond_buffer, "rain")==0) {
             text_layer_set_text(s_cond_layer, "8");
-            window_set_background_color(s_main_window, GColorOxfordBlue);
+            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorOxfordBlue, GColorBlack));
             set_all_text_layer(GColorPictonBlue);
         }
         else if (strcmp(cond_buffer, "snow")==0) {
             text_layer_set_text(s_cond_layer, "#");
-            window_set_background_color(s_main_window, GColorWhite);
+            window_set_background_color(s_main_window, PBL_IF_BW_ELSE(GColorBlack,GColorWhite));
             set_all_text_layer(GColorPictonBlue);
         }
         else if (strcmp(cond_buffer, "sleet")==0) {
             text_layer_set_text(s_cond_layer, "$");
-            window_set_background_color(s_main_window, GColorCeleste);
+            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorCeleste, GColorBlack));
             set_all_text_layer(GColorBlue);
         }
         else if (strcmp(cond_buffer, "wind")==0) {
             text_layer_set_text(s_cond_layer, "F");
-            window_set_background_color(s_main_window, GColorWhite);
+            window_set_background_color(s_main_window, PBL_IF_BW_ELSE(GColorBlack,GColorWhite));
             set_all_text_layer(GColorBlack);
         }
         else if (strcmp(cond_buffer, "fog")==0) {
             text_layer_set_text(s_cond_layer, "M");
-            window_set_background_color(s_main_window, GColorLightGray);
+            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorLightGray, GColorBlack));
             set_all_text_layer(GColorBlack);
         }
         else if (strcmp(cond_buffer, "partly-cloudy-night")==0) {
             text_layer_set_text(s_cond_layer, "4");
-            window_set_background_color(s_main_window, GColorOxfordBlue);
+            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorOxfordBlue, GColorBlack));
             set_all_text_layer(GColorLightGray);
         }
         else {
@@ -309,9 +309,9 @@ static void main_window_load(Window *window) {
     s_temp_layer = text_layer_create(
     GRect(10, 90, 50, 30));
     text_layer_set_background_color(s_temp_layer, GColorClear);
-    text_layer_set_text_color(s_temp_layer, GColorBlue);
+    text_layer_set_text_color(s_temp_layer, GColorWhite);
     text_layer_set_text_alignment(s_temp_layer, GTextAlignmentLeft);
-    text_layer_set_text(s_temp_layer, "1");
+    text_layer_set_text(s_temp_layer, "");
     text_layer_set_font(s_temp_layer, s_people_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_temp_layer));
     //create conditions Layer
@@ -329,7 +329,7 @@ static void main_window_load(Window *window) {
     text_layer_set_background_color(s_hilo_layer, GColorClear);
     text_layer_set_text_color(s_hilo_layer, GColorWhite);
     text_layer_set_text_alignment(s_hilo_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_hilo_layer, "1");
+    text_layer_set_text(s_hilo_layer, "");
     text_layer_set_font(s_hilo_layer, s_dinsmall_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_hilo_layer));
     //create battery Layer
@@ -338,7 +338,7 @@ static void main_window_load(Window *window) {
     text_layer_set_background_color(s_batt_layer, GColorClear);
     text_layer_set_text_color(s_batt_layer, GColorWhite);
     text_layer_set_text_alignment(s_batt_layer, GTextAlignmentLeft);
-    text_layer_set_text(s_batt_layer, "1");
+    text_layer_set_text(s_batt_layer, "");
     text_layer_set_font(s_batt_layer, s_batt_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_batt_layer));
     //create shit Layer
@@ -375,7 +375,7 @@ static void init() {
     // Create main Window element and assign to pointer
     s_main_window = window_create();
     GRect bounds = layer_get_bounds(window_get_root_layer(s_main_window));
-    window_set_background_color(s_main_window, GColorBabyBlueEyes);
+    window_set_background_color(s_main_window, PBL_IF_BW_ELSE(GColorBlack, GColorBabyBlueEyes));
     // Set handlers to manage the elements inside the Window
     window_set_window_handlers(s_main_window, (WindowHandlers) {
         .load = main_window_load,
