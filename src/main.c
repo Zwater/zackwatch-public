@@ -58,7 +58,6 @@ static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value
         APP_LOG(APP_LOG_LEVEL_INFO, name_buffer);
         APP_LOG(APP_LOG_LEVEL_INFO, value_buffer);
       text_layer_set_text(s_name_layer, name_buffer);
-      
       switch(value_buffer[0]) {
             case '1':
             if (s_ppl[ppl] == '0') { 
@@ -73,7 +72,7 @@ static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value
               text_layer_set_background_color(s_name_layer, GColorBlack);
               text_layer_set_text_color(s_name_layer, GColorWhite);
               s_changed = true;
-              s_ppl[ppl] = '2';
+              s_ppl[ppl] = '0';
             }
             break;
         }
@@ -135,7 +134,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       snprintf(cond_buffer, sizeof(cond_buffer), "%s", cond_tuple->value->cstring);
       if (strcmp(cond_buffer, "clear-day")==0) {
             text_layer_set_text(s_cond_layer, "1");
-            window_set_background_color(s_main_window, GColorBabyBlueEyes);
+            window_set_background_color(s_main_window, GColorVeryLightBlue);
             set_all_text_layer(GColorWhite);
         }
         else if (strcmp(cond_buffer, "partly-cloudy-day")==0) {
@@ -165,7 +164,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         }
         else if (strcmp(cond_buffer, "sleet")==0) {
             text_layer_set_text(s_cond_layer, "$");
-            window_set_background_color(s_main_window, GColorCeleste);
+            window_set_background_color(s_main_window, GColorCadetBlue);
             set_all_text_layer(GColorBlue);
         }
         else if (strcmp(cond_buffer, "wind")==0) {
@@ -405,3 +404,5 @@ int main(void) {
     app_event_loop();
     deinit();
 }
+
+
