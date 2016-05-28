@@ -3,8 +3,8 @@
 up to 4 entries, remove any not required ie
 {"A":"1"} 
 */
-var myAPIKey = 'FORCAST IO API';
-var mypplurl = 'URL OF JSON';
+var myAPIKey = 'forecast_ip_api';
+var mypplurl = 'ppl_server';
 var latitude = -30.123;
 var longitude = 142.111;
 var defaultlocOnly = true;
@@ -23,6 +23,9 @@ function convert(val) {
   if (metric) {
     var out = (val-32)/1.8;
     return out;
+  }
+  else {
+    return val;
   }
 }
 
@@ -97,6 +100,7 @@ function getPeople(latitude, longitude, weather) {
         "KEY_HIGHTEMP": convert(highTemperature),
         "KEY_LOWTEMP": convert(lowTemperature),
         "KEY_COND": conditions
+        
       };
       //console.log(dictionary);
       Pebble.sendAppMessage(dictionary,

@@ -18,7 +18,7 @@
 {A":"1", "B":"1", "C":"0", D":"0"}
 */
 static bool s_vibrate = true;
-static int s_interval = 5;
+static int s_interval = 1;
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 static TextLayer *s_people_layer;
@@ -55,7 +55,8 @@ static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value
     if (name_tuple && value_tuple) {
       snprintf(name_buffer, sizeof(name_buffer), "%s", name_tuple->value->cstring);
       snprintf(value_buffer, sizeof(value_buffer), "%s", value_tuple->value->cstring);
-
+        APP_LOG(APP_LOG_LEVEL_INFO, name_buffer);
+        APP_LOG(APP_LOG_LEVEL_INFO, value_buffer);
       text_layer_set_text(s_name_layer, name_buffer);
       
       switch(value_buffer[0]) {
@@ -104,7 +105,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     Tuple *value2_tuple = dict_find(iterator, KEY_VALUE2);
     Tuple *value3_tuple = dict_find(iterator, KEY_VALUE3);
     Tuple *value4_tuple = dict_find(iterator, KEY_VALUE4);
-  
+    Tuple *temp_tuple = dict_find(iterator, KEY_TEMP);
+    Tuple *hightemp_tuple = dict_find(iterator, KEY_HIGHTEMP);
+    Tuple *lowtemp_tuple = dict_find(iterator, KEY_LOWTEMP);
+    Tuple *cond_tuple = dict_find(iterator, KEY_COND);
+    Tuple *batt_tuple = dict_find(iterator, KEY_BATT);
     static char name1_buffer[2];
     static char name2_buffer[2];
     static char name3_buffer[2];
@@ -120,13 +125,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         vibes_double_pulse();
       }
     }
-    Tuple *temp_tuple = dict_find(iterator, KEY_TEMP);
-    Tuple *hightemp_tuple = dict_find(iterator, KEY_HIGHTEMP);
-    Tuple *lowtemp_tuple = dict_find(iterator, KEY_LOWTEMP);
-    Tuple *cond_tuple = dict_find(iterator, KEY_COND);
-    Tuple *batt_tuple = dict_find(iterator, KEY_BATT);
-
-
+    
     if(batt_tuple){
       snprintf(batt_buffer, sizeof(batt_buffer), "%s", batt_tuple->value->cstring);
       text_layer_set_text(s_batt_layer, batt_buffer);
@@ -188,8 +187,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
             text_layer_set_text(s_cond_layer, ")");
         }
     }
+    
+    
     if(temp_tuple){
       snprintf(temp_buffer, sizeof(temp_buffer), "%d°", (int)temp_tuple->value->int32);
+      APP_LOG(APP_LOG_LEVEL_INFO, temp_buffer);
       text_layer_set_text(s_temp_layer, temp_buffer);
     }
     // If all data is available, use it
@@ -309,7 +311,7 @@ static void main_window_load(Window *window) {
     text_layer_set_background_color(s_temp_layer, GColorClear);
     text_layer_set_text_color(s_temp_layer, GColorBlue);
     text_layer_set_text_alignment(s_temp_layer, GTextAlignmentLeft);
-    text_layer_set_text(s_temp_layer, "");
+    text_layer_set_text(s_temp_layer, "1");
     text_layer_set_font(s_temp_layer, s_people_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_temp_layer));
     //create conditions Layer
@@ -327,7 +329,7 @@ static void main_window_load(Window *window) {
     text_layer_set_background_color(s_hilo_layer, GColorClear);
     text_layer_set_text_color(s_hilo_layer, GColorWhite);
     text_layer_set_text_alignment(s_hilo_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_hilo_layer, "");
+    text_layer_set_text(s_hilo_layer, "1");
     text_layer_set_font(s_hilo_layer, s_dinsmall_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_hilo_layer));
     //create battery Layer
@@ -336,7 +338,7 @@ static void main_window_load(Window *window) {
     text_layer_set_background_color(s_batt_layer, GColorClear);
     text_layer_set_text_color(s_batt_layer, GColorWhite);
     text_layer_set_text_alignment(s_batt_layer, GTextAlignmentLeft);
-    text_layer_set_text(s_batt_layer, "");
+    text_layer_set_text(s_batt_layer, "1");
     text_layer_set_font(s_batt_layer, s_batt_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_batt_layer));
     //create shit Layer
