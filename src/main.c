@@ -18,7 +18,7 @@
 {A":"1", "B":"1", "C":"0", D":"0"}
 */
 static bool s_vibrate = true;
-static int s_interval = 1;
+static int s_interval = 5;
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 static TextLayer *s_people_layer;
