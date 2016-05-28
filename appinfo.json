@@ -15,7 +15,8 @@
         "KEY_VALUE4": 13
     },
     "capabilities": [
-        "location"
+        "location",
+        "configurable"
     ],
     "companyName": "zachary.waser@gmail.com",
     "enableMultiJS": true,

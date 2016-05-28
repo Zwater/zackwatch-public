@@ -3,12 +3,12 @@
 up to 4 entries, remove any not required ie
 {"A":"1"} 
 */
-var myAPIKey = 'forecast_io_api';
-var mypplurl = 'ppl_server';
+var myAPIKey = localStorage.getItem('apikey');
+var mypplurl = localStorage.getItem('ppl');
 var latitude = -30.123;
 var longitude = 142.111;
 var defaultlocOnly = false;
-var metric = false;
+var metric = localStorage.getItem('metric');
 
 var xhrRequest = function(url, type, callback) {
   var xhr = new XMLHttpRequest();
@@ -142,7 +142,24 @@ Pebble.addEventListener('ready',
     getWeather();
   }
 );
+Pebble.addEventListener('showConfiguration', function() {
+  var curl = 'http://zwater.no-ip.org/appconfig.html';
+  console.log('Showing configuration page: ' + curl);
 
+  Pebble.openURL(curl);
+});
+Pebble.addEventListener('webviewclosed', function(e) {
+  var configData = JSON.parse(decodeURIComponent(e.response));
+  console.log('Configuration page returned: ' + JSON.stringify(configData));
+  mypplurl = configData['ppl'];
+  myAPIKey = configData['apikey'];
+  metric = configData['metric'];
+  localStorage['apikey'] = myAPIKey;
+  localStorage['ppl'] = mypplurl;
+  localStorage['metric'] = metric;
+  getWeather();
+
+});
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage',
   function(e) {

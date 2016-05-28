@@ -136,7 +136,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       if (strcmp(cond_buffer, "clear-day")==0) {
             text_layer_set_text(s_cond_layer, "1");
             window_set_background_color(s_main_window, COLOR_FALLBACK(GColorBabyBlueEyes, GColorBlack));
-            set_all_text_layer(GColorWhite);
+            set_all_text_layer(GColorDarkGray);
         }
         else if (strcmp(cond_buffer, "partly-cloudy-day")==0) {
             text_layer_set_text(s_cond_layer, "3");
@@ -334,10 +334,10 @@ static void main_window_load(Window *window) {
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_hilo_layer));
     //create battery Layer
     s_batt_layer = text_layer_create(
-    GRect(66, 5, 40, 20));
+    GRect(53, 5, 40, 20));
     text_layer_set_background_color(s_batt_layer, GColorClear);
     text_layer_set_text_color(s_batt_layer, GColorWhite);
-    text_layer_set_text_alignment(s_batt_layer, GTextAlignmentLeft);
+    text_layer_set_text_alignment(s_batt_layer, GTextAlignmentCenter);
     text_layer_set_text(s_batt_layer, "");
     text_layer_set_font(s_batt_layer, s_batt_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_batt_layer));
