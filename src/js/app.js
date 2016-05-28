@@ -20,13 +20,11 @@ var xhrRequest = function(url, type, callback) {
 };
 
 function convert(val) {
+  var out = val;
   if (metric) {
-    var out = (val-32)/1.8;
-    return out;
+    out = (val-32)/1.8;
   }
-  else {
-    return val;
-  }
+  return out;
 }
 
 function locFailure() {
