@@ -1,5 +1,6 @@
 #!/bin/bash
-ip=`ssh admin@192.168.0.1 "dumpleases -f /tmp/var/dnsmasq.leases -a -r| grep '${1}'" | awk '{print $3}'`
+#ip=`ssh admin@192.168.0.1 "dumpleases -f /tmp/var/dnsmasq.leases -a -r| grep '${1}'" | awk '{print $3}'`
+ip=`ssh admin@192.168.1.1 "arp -a" | grep ${1} | awk '{print $2}' | tr -d '()'`
 #arp=`ssh admin@192.168.0.1 "arp -a ${ip}"`
 #if [[ $arp == "No match found"* ]]; then
 #    echo 0 
