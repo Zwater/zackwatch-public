@@ -55,25 +55,29 @@ static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value
     if (name_tuple && value_tuple) {
       snprintf(name_buffer, sizeof(name_buffer), "%s", name_tuple->value->cstring);
       snprintf(value_buffer, sizeof(value_buffer), "%s", value_tuple->value->cstring);
-        APP_LOG(APP_LOG_LEVEL_INFO, name_buffer);
-        APP_LOG(APP_LOG_LEVEL_INFO, value_buffer);
       text_layer_set_text(s_name_layer, name_buffer);
+      APP_LOG(APP_LOG_LEVEL_INFO, name_buffer);
+      APP_LOG(APP_LOG_LEVEL_INFO, value_buffer);
       
       switch(value_buffer[0]) {
             case '1':
             if (s_ppl[ppl] == '0') { 
               text_layer_set_background_color(s_name_layer, GColorWhite);
               text_layer_set_text_color(s_name_layer, GColorBlack);
+              APP_LOG(APP_LOG_LEVEL_INFO, name_buffer);
+              APP_LOG(APP_LOG_LEVEL_INFO, value_buffer);
               s_changed = true;
               s_ppl[ppl] = '1';
             }
             break;
-            case '0':
+            default:
             if (s_ppl[ppl] == '1') { 
               text_layer_set_background_color(s_name_layer, GColorBlack);
               text_layer_set_text_color(s_name_layer, GColorWhite);
+              APP_LOG(APP_LOG_LEVEL_INFO, name_buffer);
+              APP_LOG(APP_LOG_LEVEL_INFO, value_buffer);
               s_changed = true;
-              s_ppl[ppl] = '2';
+              s_ppl[ppl] = '0';
             }
             break;
         }

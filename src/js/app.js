@@ -8,7 +8,8 @@ var mypplurl = localStorage.getItem('ppl');
 var latitude = -30.123;
 var longitude = 142.111;
 var defaultlocOnly = false;
-var metric = localStorage.getItem('metric');
+var metric = false
+console.log(metric)
 
 var xhrRequest = function(url, type, callback) {
   var xhr = new XMLHttpRequest();
@@ -40,7 +41,7 @@ function locSuccess(pos) {
 }
 
 function getPeople(latitude, longitude, weather) {
-
+  console.log(metric)
   console.log('getting people and weather!');
   xhrRequest(mypplurl, 'GET',
     function(responseText) {
@@ -154,7 +155,6 @@ Pebble.addEventListener('webviewclosed', function(e) {
   metric = configData['metric'];
   localStorage['apikey'] = myAPIKey;
   localStorage['ppl'] = mypplurl;
-  localStorage['metric'] = metric;
   getWeather();
 
 });
