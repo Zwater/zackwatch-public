@@ -8,7 +8,7 @@ var mypplurl = localStorage.getItem('ppl');
 var latitude = -30.123;
 var longitude = 142.111;
 var defaultlocOnly = false;
-var metric = false
+var metric = localStorage.getItem('metric');
 console.log(metric)
 
 var xhrRequest = function(url, type, callback) {
@@ -21,11 +21,13 @@ var xhrRequest = function(url, type, callback) {
 };
 
 function convert(val) {
-  var out = val;
-  if (metric) {
-    out = (val-32)/1.8;
+  if (metric == 'true') {
+    var out = (val-32)/1.8;
+    return out;
   }
-  return out;
+  else {
+    return val;
+  }
 }
 
 function locFailure() {
@@ -155,6 +157,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
   metric = configData['metric'];
   localStorage['apikey'] = myAPIKey;
   localStorage['ppl'] = mypplurl;
+  localStorage['metric'] = metric;
   getWeather();
 
 });
