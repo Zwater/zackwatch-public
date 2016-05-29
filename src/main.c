@@ -61,24 +61,24 @@ static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value
       
       switch(value_buffer[0]) {
             case '1':
-            if (s_ppl[ppl] == '0') { 
+            //if (s_ppl[ppl] == '0') { 
               text_layer_set_background_color(s_name_layer, GColorWhite);
               text_layer_set_text_color(s_name_layer, GColorBlack);
               APP_LOG(APP_LOG_LEVEL_INFO, name_buffer);
               APP_LOG(APP_LOG_LEVEL_INFO, value_buffer);
-              s_changed = true;
-              s_ppl[ppl] = '1';
-            }
+              //s_changed = true;
+              //s_ppl[ppl] = '1';
+            //}
             break;
             default:
-            if (s_ppl[ppl] == '1') { 
+            //if (s_ppl[ppl] == '1') { 
               text_layer_set_background_color(s_name_layer, GColorBlack);
               text_layer_set_text_color(s_name_layer, GColorWhite);
               APP_LOG(APP_LOG_LEVEL_INFO, name_buffer);
               APP_LOG(APP_LOG_LEVEL_INFO, value_buffer);
-              s_changed = true;
-              s_ppl[ppl] = '0';
-            }
+              //s_changed = true;
+              //s_ppl[ppl] = '0';
+            //}
             break;
         }
     }
