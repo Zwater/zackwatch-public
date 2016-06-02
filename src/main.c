@@ -13,6 +13,8 @@
 #define KEY_VALUE2 11
 #define KEY_VALUE3 12
 #define KEY_VALUE4 13
+#define KEY_REFRESH 14
+#define KEY_PPLDISABLE 15
 
 /*json file looks like
 {A":"1", "B":"1", "C":"0", D":"0"}
@@ -93,18 +95,17 @@ static void bluetooth_callback(bool connected) {
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
     text_layer_set_text(s_shit_layer, "");
     // Store incoming information
+    static char refresh_buffer[4];
     static char temp_buffer[6];
     static char hightemp_buffer[6];
     static char lowtemp_buffer[6];
     static char cond_buffer[64];
     static char hilo_buffer[16];
     static char batt_buffer[8];
+    static char ppldisable[6];
   
     // Read tuples for data
-    Tuple *name1_tuple = dict_find(iterator, KEY_NAME1);
-    Tuple *name2_tuple = dict_find(iterator, KEY_NAME2);
-    Tuple *name3_tuple = dict_find(iterator, KEY_NAME3);
-    Tuple *name4_tuple = dict_find(iterator, KEY_NAME4);
+    
     Tuple *value1_tuple = dict_find(iterator, KEY_VALUE1);
     Tuple *value2_tuple = dict_find(iterator, KEY_VALUE2);
     Tuple *value3_tuple = dict_find(iterator, KEY_VALUE3);
@@ -114,22 +115,53 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     Tuple *lowtemp_tuple = dict_find(iterator, KEY_LOWTEMP);
     Tuple *cond_tuple = dict_find(iterator, KEY_COND);
     Tuple *batt_tuple = dict_find(iterator, KEY_BATT);
-    static char name1_buffer[2];
-    static char name2_buffer[2];
-    static char name3_buffer[2];
-    static char name4_buffer[2];
-  
-    set_ppl(1,name1_buffer, name1_tuple, value1_tuple, s_name1_layer);
-    set_ppl(2,name2_buffer, name2_tuple, value2_tuple, s_name2_layer);
-    set_ppl(3,name3_buffer, name3_tuple, value3_tuple, s_name3_layer);
-    set_ppl(4,name4_buffer, name4_tuple, value4_tuple, s_name4_layer);
-    if(s_changed){
-      s_changed = false;
-      if(s_vibrate){
-        vibes_double_pulse();
+    Tuple *refresh_tuple = dict_find(iterator, KEY_REFRESH);
+    Tuple *ppldisable_tuple = dict_find(iterator, KEY_PPLDISABLE);
+    snprintf(ppldisable, sizeof(ppldisable), "%s", ppldisable_tuple->value->cstring);
+    Tuple *name1_tuple = dict_find(iterator, KEY_NAME1);
+      Tuple *name2_tuple = dict_find(iterator, KEY_NAME2);
+      Tuple *name3_tuple = dict_find(iterator, KEY_NAME3);
+      Tuple *name4_tuple = dict_find(iterator, KEY_NAME4);
+      static char name1_buffer[2];
+      static char name2_buffer[2];
+      static char name3_buffer[2];
+      static char name4_buffer[2];
+    if(strcmp(ppldisable, "no")==0){
+      //I don't know how to work with booleans that may or may not be inside a tuple in C. 
+      text_layer_set_background_color(s_people_layer, GColorBlack);
+      text_layer_set_background_color(s_name1_layer, GColorBlack);
+      text_layer_set_background_color(s_name2_layer, GColorBlack);
+      text_layer_set_background_color(s_name3_layer, GColorBlack);
+      text_layer_set_background_color(s_name4_layer, GColorBlack);
+      set_ppl(1,name1_buffer, name1_tuple, value1_tuple, s_name1_layer);
+      set_ppl(2,name2_buffer, name2_tuple, value2_tuple, s_name2_layer);
+      set_ppl(3,name3_buffer, name3_tuple, value3_tuple, s_name3_layer);
+      set_ppl(4,name4_buffer, name4_tuple, value4_tuple, s_name4_layer);
+      
+      if(s_changed){
+        s_changed = false;
+        if(s_vibrate){
+          vibes_double_pulse();
+        }
       }
     }
+    else if (strcmp(ppldisable, "yes")==0){
+      text_layer_set_background_color(s_people_layer, GColorClear);
+      text_layer_set_background_color(s_name1_layer, GColorClear);
+      text_layer_set_background_color(s_name2_layer, GColorClear);
+      text_layer_set_background_color(s_name3_layer, GColorClear);
+      text_layer_set_background_color(s_name4_layer, GColorClear);
+      text_layer_set_text(s_name1_layer, "");
+      text_layer_set_text(s_name2_layer, "");
+      text_layer_set_text(s_name3_layer, "");
+      text_layer_set_text(s_name4_layer, "");
+      
+    }
     
+    if(refresh_tuple){
+      snprintf(refresh_buffer, sizeof(refresh_buffer), "%s", refresh_tuple->value->cstring);
+      s_interval = atoi(refresh_buffer);
+    }
     if(batt_tuple){
       snprintf(batt_buffer, sizeof(batt_buffer), "%s", batt_tuple->value->cstring);
       text_layer_set_text(s_batt_layer, batt_buffer);

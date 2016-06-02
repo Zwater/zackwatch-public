@@ -5,9 +5,11 @@ up to 4 entries, remove any not required ie
 */
 var myAPIKey = localStorage.getItem('apikey');
 var mypplurl = localStorage.getItem('ppl');
+var refresh = localStorage.getItem('refresh');
 var latitude = -30.123;
 var longitude = 142.111;
 var defaultlocOnly = false;
+var ppldisable = localStorage.getItem('ppldisable');
 var metric = localStorage.getItem('metric');
 console.log(metric)
 
@@ -21,11 +23,13 @@ var xhrRequest = function(url, type, callback) {
 };
 
 function convert(val) {
-  if (metric == 'true') {
+  if (metric) {
     var out = (val-32)/1.8;
+    console.log("converting " + val + " to " + out)
     return out;
   }
   else {
+    console.log("not converting anything for " + val)
     return val;
   }
 }
@@ -43,12 +47,13 @@ function locSuccess(pos) {
 }
 
 function getPeople(latitude, longitude, weather) {
-  console.log(metric)
   console.log('getting people and weather!');
   xhrRequest(mypplurl, 'GET',
     function(responseText) {
       var ppljson = JSON.parse(responseText);
-      var dictionary = {};
+      var dictionary = {
+        "KEY_PPLDISABLE": ppldisable
+      };
       for (var i=0; i<Object.keys(ppljson).length; i++) {
         var name = Object.keys(ppljson)[i];
         dictionary["KEY_NAME"+(i+1)] = name;
@@ -82,6 +87,7 @@ function getPeople(latitude, longitude, weather) {
     function(responseText) {
       // responseText contains a JSON object with weather info
       console.log(responseText);
+      console.log('metric is set to ' + metric);
       var json = JSON.parse(responseText);
       // Temperature, current, high, and low
       var temperature = json.currently.temperature;
@@ -95,12 +101,13 @@ function getPeople(latitude, longitude, weather) {
       // Conditions
       var conditions = json.currently.icon;
       console.log('Conditions are ' + conditions);
-    
+      console.log(ppldisable + "is ppldisable");
       var dictionary = {
         "KEY_TEMP": convert(temperature),
         "KEY_HIGHTEMP": convert(highTemperature),
         "KEY_LOWTEMP": convert(lowTemperature),
-        "KEY_COND": conditions
+        "KEY_COND": conditions,
+        "KEY_REFRESH": refresh
         
       };
       //console.log(dictionary);
@@ -155,9 +162,15 @@ Pebble.addEventListener('webviewclosed', function(e) {
   mypplurl = configData['ppl'];
   myAPIKey = configData['apikey'];
   metric = configData['metric'];
+  refresh = configData['refresh'];
+  ppldisable = configData['ppldisable'];
+  console.log("ppldisable status is " + ppldisable)
+  console.log("ppldisable is an " + typeof ppldisable)
   localStorage['apikey'] = myAPIKey;
   localStorage['ppl'] = mypplurl;
   localStorage['metric'] = metric;
+  localStorage['refresh'] = refresh;
+  localStorage['ppldisable'] = ppldisable;
   getWeather();
 
 });
