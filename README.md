@@ -15,3 +15,6 @@ All that is required is a webpage with a JSON string that looks like this:
 `{"Z":"1", "M":"0", "S":"1", "A":"0"}`
 
 More detailed setup with multiple methods will come when I find the time to do a proper writeup.
+
+APK to push battery status available [https://github.com/daktak/zackwatch_android](https://github.com/daktak/zackwatch_android/releases/download/v0.1/org.zackwatch.apk)
+
