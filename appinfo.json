@@ -8,15 +8,17 @@
         "KEY_NAME2": 1,
         "KEY_NAME3": 2,
         "KEY_NAME4": 3,
+        "KEY_NAME5": 4,
         "KEY_PPL": 15,
         "KEY_PPL_TOTAL": 9,
         "KEY_REFRESH": 16,
-        "KEY_TEMP": 4,
+        "KEY_TEMP": 17,
         "KEY_VALUE1": 10,
         "KEY_VALUE2": 11,
         "KEY_VALUE3": 12,
         "KEY_VALUE4": 13,
-        "KEY_VIBRATE": 14
+        "KEY_VALUE5": 14,
+        "KEY_VIBRATE": 18
     },
     "capabilities": [
         "location",

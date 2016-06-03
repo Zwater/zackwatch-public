@@ -4,7 +4,8 @@
 #define KEY_NAME2 1
 #define KEY_NAME3 2
 #define KEY_NAME4 3
-#define KEY_TEMP 4
+#define KEY_NAME5 4
+#define KEY_TEMP 17
 #define KEY_HIGHTEMP 5
 #define KEY_LOWTEMP 6
 #define KEY_COND 7
@@ -14,9 +15,10 @@
 #define KEY_VALUE2 11
 #define KEY_VALUE3 12
 #define KEY_VALUE4 13
-#define KEY_VIBRATE 14
+#define KEY_VALUE5 14
 #define KEY_PPL 15
 #define KEY_REFRESH 16
+#define KEY_VIBRATE 18
 
 /*json file looks like
   {A":"1", "B":"1", "C":"0", D":"0"}
@@ -28,7 +30,7 @@ static int ppl_total;
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 static TextLayer *s_people_layer;
-static TextLayer *sa_name_layer[5];
+static TextLayer *sa_name_layer[6];
 static TextLayer *s_date_layer;
 static TextLayer *s_temp_layer;
 static TextLayer *s_cond_layer;
@@ -40,7 +42,7 @@ static GFont s_people_font;
 static GFont s_weather_font;
 static GFont s_dinsmall_font;
 static GFont s_batt_font;
-static char s_ppl[] = {'0','0','0','0'};
+static char s_ppl[6];
 static bool s_changed = false;
 static int s_sizew;
 
@@ -61,25 +63,23 @@ static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value
         snprintf(value_buffer, sizeof(value_buffer), "%s", value_tuple->value->cstring);
         text_layer_set_text(s_name_layer, name_buffer);
 
-        switch(value_buffer[0]) {
-            case '1':
-                //prevent re-draw if not required etc
-                if (s_ppl[ppl] == '0') { 
-                    text_layer_set_background_color(s_name_layer, GColorWhite);
-                    text_layer_set_text_color(s_name_layer, GColorBlack);
-                    s_changed = true;
-                    s_ppl[ppl] = '1';
-                }
-                break;
-            default:
-                if (s_ppl[ppl] == '1') { 
-                    text_layer_set_background_color(s_name_layer, GColorBlack);
-                    text_layer_set_text_color(s_name_layer, GColorWhite);
-                    s_changed = true;
-                    s_ppl[ppl] = '0';
-                }
-                break;
+      if (strcmp(value_buffer, "1")==0){
+        //prevent re-draw if not required etc
+        if (s_ppl[ppl] ==0){
+          text_layer_set_background_color(s_name_layer, GColorWhite);
+          text_layer_set_text_color(s_name_layer, GColorBlack);
+          s_changed = true;
+          s_ppl[ppl] = 1;
         }
+      } else {
+        if (s_ppl[ppl] ==1){
+            text_layer_set_background_color(s_name_layer, GColorBlack);
+            text_layer_set_text_color(s_name_layer, GColorWhite);
+            s_changed = true;
+            s_ppl[ppl] = 0;
+          }
+      }
+
     }
 
 }
@@ -111,6 +111,7 @@ static int get_ppl_pos(double pos) {
 
 static void create_ppl() {
     for(int i = 1; i <= ppl_total; i++){
+        s_ppl[i] = 0;
         sa_name_layer[i] = text_layer_create(
                 GRect(get_ppl_pos(i), 0, block_size, block_size));
         create_ppl_layer(sa_name_layer[i]);
