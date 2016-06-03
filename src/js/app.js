@@ -3,15 +3,19 @@
 up to 4 entries, remove any not required ie
 {"A":"1"} 
 */
+
 var myAPIKey = localStorage.getItem('apikey');
 var mypplurl = localStorage.getItem('ppl');
-var refresh = localStorage.getItem('refresh');
-var latitude = -30.123;
-var longitude = 142.111;
-var defaultlocOnly = false;
-var ppldisable = localStorage.getItem('ppldisable');
+var latitude = localStorage.getItem('latitude');
+var longitude = localStorage.getItem('longitude');
+var defaultlocOnly = localStorage.getItem('defaultlocOnly');
 var metric = localStorage.getItem('metric');
-console.log(metric)
+var ppl_disable = localStorage.getItem('ppldisable');
+var refresh = localStorage.getItem('refresh');
+var vibration = localStorage.getItem('vibration');
+
+//var curl = 'http://zwater.no-ip.org/appconfig.html';
+var curl = 'http://daktak.github.io/zackwatch-config/';
 
 var xhrRequest = function(url, type, callback) {
   var xhr = new XMLHttpRequest();
@@ -23,15 +27,11 @@ var xhrRequest = function(url, type, callback) {
 };
 
 function convert(val) {
+  var out = val;
   if (metric) {
-    var out = (val-32)/1.8;
-    console.log("converting " + val + " to " + out)
-    return out;
+    out = (val-32)/1.8;
   }
-  else {
-    console.log("not converting anything for " + val)
-    return val;
-  }
+  return out;
 }
 
 function locFailure() {
@@ -47,34 +47,35 @@ function locSuccess(pos) {
 }
 
 function getPeople(latitude, longitude, weather) {
-  console.log('getting people and weather!');
-  xhrRequest(mypplurl, 'GET',
-    function(responseText) {
-      var ppljson = JSON.parse(responseText);
-      var dictionary = {
-        "KEY_PPLDISABLE": ppldisable
-      };
-      for (var i=0; i<Object.keys(ppljson).length; i++) {
-        var name = Object.keys(ppljson)[i];
-        dictionary["KEY_NAME"+(i+1)] = name;
-        var val = ppljson[Object.keys(ppljson)[i]];
-        dictionary["KEY_VALUE"+(i+1)] = val;
-        console.log(name + ':' + val);
-      }
-      console.log('got people');
-
-      //console.log(dictionary);
-      Pebble.sendAppMessage(dictionary,
-        function(e) {
-          console.log('People info sent to Pebble successfully!');
-        },
-
-        function(e) {
-          console.log('Error sending people info to Pebble!');
+  if (!ppl_disable){
+    console.log('getting people and weather!');
+    xhrRequest(mypplurl, 'GET',
+      function(responseText) {
+        var ppljson = JSON.parse(responseText);
+        var dictionary = {};
+        for (var i=0; i<Object.keys(ppljson).length; i++) {
+          var name = Object.keys(ppljson)[i];
+          dictionary["KEY_NAME"+(i+1)] = name;
+          var val = ppljson[Object.keys(ppljson)[i]];
+          dictionary["KEY_VALUE"+(i+1)] = val;
+          console.log(name + ':' + val);
         }
-      );
-    }
-  );
+        dictionary.KEY_PPL_TOTAL = ""+Object.keys(ppljson).length;
+        console.log('got people');
+  
+        //console.log(dictionary);
+        Pebble.sendAppMessage(dictionary,
+          function(e) {
+            console.log('People info sent to Pebble successfully!');
+          },
+  
+          function(e) {
+            console.log('Error sending people info to Pebble!');
+          }
+        );
+      }
+    );
+  }
   if (weather) {
   // Construct URL
   //var url = 'https://api.forecast.io/forecast/' +
@@ -87,7 +88,6 @@ function getPeople(latitude, longitude, weather) {
     function(responseText) {
       // responseText contains a JSON object with weather info
       console.log(responseText);
-      console.log('metric is set to ' + metric);
       var json = JSON.parse(responseText);
       // Temperature, current, high, and low
       var temperature = json.currently.temperature;
@@ -101,13 +101,12 @@ function getPeople(latitude, longitude, weather) {
       // Conditions
       var conditions = json.currently.icon;
       console.log('Conditions are ' + conditions);
-      console.log(ppldisable + "is ppldisable");
+    
       var dictionary = {
         "KEY_TEMP": convert(temperature),
         "KEY_HIGHTEMP": convert(highTemperature),
         "KEY_LOWTEMP": convert(lowTemperature),
-        "KEY_COND": conditions,
-        "KEY_REFRESH": refresh
+        "KEY_COND": conditions
         
       };
       //console.log(dictionary);
@@ -127,6 +126,7 @@ function getPeople(latitude, longitude, weather) {
 
 
 function getWeather() {
+
   if (defaultlocOnly) {
     getPeople(latitude, longitude, true);
   } else {
@@ -151,29 +151,51 @@ Pebble.addEventListener('ready',
   }
 );
 Pebble.addEventListener('showConfiguration', function() {
-  var curl = 'http://zwater.no-ip.org/appconfig.html';
   console.log('Showing configuration page: ' + curl);
 
   Pebble.openURL(curl);
 });
+
 Pebble.addEventListener('webviewclosed', function(e) {
   var configData = JSON.parse(decodeURIComponent(e.response));
   console.log('Configuration page returned: ' + JSON.stringify(configData));
-  mypplurl = configData['ppl'];
-  myAPIKey = configData['apikey'];
-  metric = configData['metric'];
-  refresh = configData['refresh'];
-  ppldisable = configData['ppldisable'];
-  console.log("ppldisable status is " + ppldisable)
-  console.log("ppldisable is an " + typeof ppldisable)
-  localStorage['apikey'] = myAPIKey;
-  localStorage['ppl'] = mypplurl;
-  localStorage['metric'] = metric;
-  localStorage['refresh'] = refresh;
-  localStorage['ppldisable'] = ppldisable;
+  mypplurl = configData.ppl;
+  myAPIKey = configData.apikey;
+  metric = configData.metric;
+  longitude = configData.longitude;
+  latitude = configData.latitude;
+  defaultlocOnly = configData.defaultlocOnly;
+  refresh = configData.refresh;
+  vibration = configData.vibration;
+  ppl_disable = configData.ppl_disable;
+  localStorage.apikey = myAPIKey;
+  localStorage.ppl = mypplurl;
+  localStorage.metric = metric;
+  localStorage.longitude = longitude;
+  localStorage.latitude = latitude;
+  localStorage.defaultlocOnly = defaultlocOnly;
+  send_to_c();
   getWeather();
 
 });
+
+function send_to_c(){
+  var dictionary = {
+    "KEY_VIBRATE": ""+vibration,
+    "KEY_REFRESH": ""+refresh,
+    "KEY_PPL": ""+ppl_disable
+  };
+  //console.log(dictionary);
+  Pebble.sendAppMessage(dictionary,
+                        function(e) {
+                          console.log('Config info sent to Pebble successfully!');
+                        },
+
+                        function(e) {
+                          console.log('Error sending config info to Pebble!');
+                        }
+                       );
+}
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage',
   function(e) {
