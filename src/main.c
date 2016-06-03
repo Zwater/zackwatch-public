@@ -28,10 +28,6 @@ static int ppl_total;
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 static TextLayer *s_people_layer;
-static TextLayer *s_name1_layer;
-static TextLayer *s_name2_layer;
-static TextLayer *s_name3_layer;
-static TextLayer *s_name4_layer;
 static TextLayer *sa_name_layer[5];
 static TextLayer *s_date_layer;
 static TextLayer *s_temp_layer;
@@ -96,14 +92,6 @@ static void  deinit_ppl() {
   for(int i = 1; i <= ppl_total; i++){
     text_layer_destroy(sa_name_layer[i]);
   }
-  /*
-  if (ppl_total != 0) {
-  	text_layer_destroy(s_name1_layer);
-    text_layer_destroy(s_name2_layer);
-    text_layer_destroy(s_name3_layer);
-    text_layer_destroy(s_name4_layer);
-  }
-  */
 }
 
 static void create_ppl_layer(TextLayer *s_name_layer) {
@@ -128,27 +116,6 @@ static void create_ppl() {
     create_ppl_layer(sa_name_layer[i]);
     layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(sa_name_layer[i]));
   }
-  /*
-    //create Zack's Layer
-    s_name1_layer = text_layer_create(
-    GRect(get_ppl_pos(1), 0, block_size, block_size));
-    create_ppl_layer(s_name1_layer);
-    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name1_layer));
-    //create Sarah's Layer
-    s_name2_layer = text_layer_create(
-    GRect(get_ppl_pos(2), 0, block_size, block_size));
-    create_ppl_layer(s_name2_layer);
-    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name2_layer));
-    //create Alec's Layer
-    s_name3_layer = text_layer_create(
-    GRect(get_ppl_pos(3), 0, block_size, block_size));
-    create_ppl_layer(s_name3_layer);
-    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name3_layer));
-    //create Melissa's Layer
-    s_name4_layer = text_layer_create(
-    GRect(get_ppl_pos(4), 0, block_size, block_size));
-    create_ppl_layer(s_name4_layer);
-    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name4_layer));*/
 }
 
 static void update_time() {
@@ -199,15 +166,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   Tuple *name_tuple[5];
   Tuple *value_tuple[5];
   
-    // Read tuples for data
-    name_tuple[1] = dict_find(iterator, KEY_NAME1);
-    name_tuple[2] = dict_find(iterator, KEY_NAME2);
-    name_tuple[3] = dict_find(iterator, KEY_NAME3);
-    name_tuple[4] = dict_find(iterator, KEY_NAME4);
-    value_tuple[1] = dict_find(iterator, KEY_VALUE1);
-    value_tuple[2] = dict_find(iterator, KEY_VALUE2);
-    value_tuple[3] = dict_find(iterator, KEY_VALUE3);
-    value_tuple[4] = dict_find(iterator, KEY_VALUE4);
     Tuple *temp_tuple = dict_find(iterator, KEY_TEMP);
     Tuple *hightemp_tuple = dict_find(iterator, KEY_HIGHTEMP);
     Tuple *lowtemp_tuple = dict_find(iterator, KEY_LOWTEMP);
