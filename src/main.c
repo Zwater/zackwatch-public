@@ -19,8 +19,8 @@
 #define KEY_REFRESH 16
 
 /*json file looks like
-{A":"1", "B":"1", "C":"0", D":"0"}
-*/
+  {A":"1", "B":"1", "C":"0", D":"0"}
+  */
 static bool s_vibrate;
 static int s_interval;
 static int block_size = 30;
@@ -45,53 +45,53 @@ static bool s_changed = false;
 static int s_sizew;
 
 static void set_all_text_layer(GColor color) {
-            text_layer_set_text_color(s_time_layer, COLOR_FALLBACK(color, GColorWhite));
-            text_layer_set_text_color(s_date_layer, COLOR_FALLBACK(color, GColorWhite));
-            text_layer_set_text_color(s_temp_layer, COLOR_FALLBACK(color, GColorWhite));
-            text_layer_set_text_color(s_cond_layer, COLOR_FALLBACK(color, GColorWhite));
-            text_layer_set_text_color(s_hilo_layer, COLOR_FALLBACK(color, GColorWhite));
-            text_layer_set_text_color(s_batt_layer, COLOR_FALLBACK(color, GColorWhite));
+    text_layer_set_text_color(s_time_layer, COLOR_FALLBACK(color, GColorWhite));
+    text_layer_set_text_color(s_date_layer, COLOR_FALLBACK(color, GColorWhite));
+    text_layer_set_text_color(s_temp_layer, COLOR_FALLBACK(color, GColorWhite));
+    text_layer_set_text_color(s_cond_layer, COLOR_FALLBACK(color, GColorWhite));
+    text_layer_set_text_color(s_hilo_layer, COLOR_FALLBACK(color, GColorWhite));
+    text_layer_set_text_color(s_batt_layer, COLOR_FALLBACK(color, GColorWhite));
 }
 
 static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value_tuple,  TextLayer *s_name_layer) {
 
     static char value_buffer[2];
     if (name_tuple && value_tuple) {
-      snprintf(name_buffer, sizeof(name_buffer), "%s", name_tuple->value->cstring);
-      snprintf(value_buffer, sizeof(value_buffer), "%s", value_tuple->value->cstring);
-      text_layer_set_text(s_name_layer, name_buffer);
-      
-      switch(value_buffer[0]) {
+        snprintf(name_buffer, sizeof(name_buffer), "%s", name_tuple->value->cstring);
+        snprintf(value_buffer, sizeof(value_buffer), "%s", value_tuple->value->cstring);
+        text_layer_set_text(s_name_layer, name_buffer);
+
+        switch(value_buffer[0]) {
             case '1':
-	    //prevent re-draw if not required etc
-            if (s_ppl[ppl] == '0') { 
-              text_layer_set_background_color(s_name_layer, GColorWhite);
-              text_layer_set_text_color(s_name_layer, GColorBlack);
-              s_changed = true;
-              s_ppl[ppl] = '1';
-            }
-            break;
+                //prevent re-draw if not required etc
+                if (s_ppl[ppl] == '0') { 
+                    text_layer_set_background_color(s_name_layer, GColorWhite);
+                    text_layer_set_text_color(s_name_layer, GColorBlack);
+                    s_changed = true;
+                    s_ppl[ppl] = '1';
+                }
+                break;
             default:
-            if (s_ppl[ppl] == '1') { 
-              text_layer_set_background_color(s_name_layer, GColorBlack);
-              text_layer_set_text_color(s_name_layer, GColorWhite);
-              s_changed = true;
-              s_ppl[ppl] = '0';
-            }
-            break;
+                if (s_ppl[ppl] == '1') { 
+                    text_layer_set_background_color(s_name_layer, GColorBlack);
+                    text_layer_set_text_color(s_name_layer, GColorWhite);
+                    s_changed = true;
+                    s_ppl[ppl] = '0';
+                }
+                break;
         }
     }
-  
+
 }
 
 static void bluetooth_callback(bool connected) {
-  vibes_double_pulse();
+    vibes_double_pulse();
 }
 
 static void  deinit_ppl() {
-  for(int i = 1; i <= ppl_total; i++){
-    text_layer_destroy(sa_name_layer[i]);
-  }
+    for(int i = 1; i <= ppl_total; i++){
+        text_layer_destroy(sa_name_layer[i]);
+    }
 }
 
 static void create_ppl_layer(TextLayer *s_name_layer) {
@@ -103,19 +103,19 @@ static void create_ppl_layer(TextLayer *s_name_layer) {
 }
 
 static int get_ppl_pos(double pos) {
-  int unit_size = s_sizew / ppl_total;
-  int gap_size = (unit_size - block_size)/2;
-  int rpos = s_sizew/ppl_total * pos - block_size - gap_size;
-  return rpos;
+    int unit_size = s_sizew / ppl_total;
+    int gap_size = (unit_size - block_size)/2;
+    int rpos = s_sizew/ppl_total * pos - block_size - gap_size;
+    return rpos;
 }
 
 static void create_ppl() {
-  for(int i = 1; i <= ppl_total; i++){
-    sa_name_layer[i] = text_layer_create(
-    GRect(get_ppl_pos(i), 0, block_size, block_size));
-    create_ppl_layer(sa_name_layer[i]);
-    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(sa_name_layer[i]));
-  }
+    for(int i = 1; i <= ppl_total; i++){
+        sa_name_layer[i] = text_layer_create(
+                GRect(get_ppl_pos(i), 0, block_size, block_size));
+        create_ppl_layer(sa_name_layer[i]);
+        layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(sa_name_layer[i]));
+    }
 }
 
 static void update_time() {
@@ -125,7 +125,7 @@ static void update_time() {
     // Write the current hours and minutes into a buffer
     static char s_buffer[8];
     strftime(s_buffer, sizeof(s_buffer), clock_is_24h_style() ?
-    "%H:%M" : "%I:%M", tick_time);
+            "%H:%M" : "%I:%M", tick_time);
     // Display this time on the TextLayer
     text_layer_set_text(s_time_layer, s_buffer);
     // Copy date into buffer from tm structure
@@ -162,10 +162,10 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     static char vibration_buffer[8];
     static char ppl_buffer[8];
     static char ppl_total_buffer[8];
-  static char buffer[5][8];
-  Tuple *name_tuple[5];
-  Tuple *value_tuple[5];
-  
+    static char buffer[5][8];
+    Tuple *name_tuple[5];
+    Tuple *value_tuple[5];
+
     Tuple *temp_tuple = dict_find(iterator, KEY_TEMP);
     Tuple *hightemp_tuple = dict_find(iterator, KEY_HIGHTEMP);
     Tuple *lowtemp_tuple = dict_find(iterator, KEY_LOWTEMP);
@@ -175,75 +175,75 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     Tuple *vibration_tuple = dict_find(iterator, KEY_VIBRATE);
     Tuple *ppl_tuple = dict_find(iterator, KEY_PPL);
     Tuple *ppl_total_tuple = dict_find(iterator, KEY_PPL_TOTAL);
-  
+
     if(ppl_total_tuple){
-      snprintf(ppl_total_buffer, sizeof(ppl_total_buffer), "%s", ppl_total_tuple->value->cstring);
-      /*static char ppl_buff[2];
-      snprintf(ppl_buff, sizeof(ppl_buff), "%i",ppl_total);
-      APP_LOG(APP_LOG_LEVEL_INFO, ppl_buff);*/
-      if (ppl_total != 0) {
-        if (atoi(ppl_total_buffer) != ppl_total){
-            //deinit before changing ppl_total
-            deinit_ppl();
-          APP_LOG(APP_LOG_LEVEL_INFO, ppl_total_buffer);
-          ppl_total = atoi(ppl_total_buffer);
-          create_ppl();
-          //if number of people change, then have to wait till next refresh 
+        snprintf(ppl_total_buffer, sizeof(ppl_total_buffer), "%s", ppl_total_tuple->value->cstring);
+        /*static char ppl_buff[2];
+          snprintf(ppl_buff, sizeof(ppl_buff), "%i",ppl_total);
+          APP_LOG(APP_LOG_LEVEL_INFO, ppl_buff);*/
+        if (ppl_total != 0) {
+            if (atoi(ppl_total_buffer) != ppl_total){
+                //deinit before changing ppl_total
+                deinit_ppl();
+                APP_LOG(APP_LOG_LEVEL_INFO, ppl_total_buffer);
+                ppl_total = atoi(ppl_total_buffer);
+                create_ppl();
+                //if number of people change, then have to wait till next refresh 
+            }
         }
-      }
-      
+
     }
-  
+
     for(int i = 1; i <= ppl_total; i++){
-       name_tuple[i] = dict_find(iterator, i-1);
-       value_tuple[i] = dict_find(iterator, i+9);
-       set_ppl(i,buffer[i], name_tuple[i], value_tuple[i], sa_name_layer[i]);
+        name_tuple[i] = dict_find(iterator, i-1);
+        value_tuple[i] = dict_find(iterator, i+9);
+        set_ppl(i,buffer[i], name_tuple[i], value_tuple[i], sa_name_layer[i]);
     }
 
     if(s_changed){
-      s_changed = false;
-      if(s_vibrate){
-        vibes_double_pulse();
-      }
+        s_changed = false;
+        if(s_vibrate){
+            vibes_double_pulse();
+        }
     }
-  
+
     if(vibration_tuple){
-      snprintf(vibration_buffer, sizeof(vibration_buffer), "%s", vibration_tuple->value->cstring);
-      if (strcmp(vibration_buffer, "true")==0){
-        s_vibrate = true;
-      } else {
-        s_vibrate = false;
-      }
+        snprintf(vibration_buffer, sizeof(vibration_buffer), "%s", vibration_tuple->value->cstring);
+        if (strcmp(vibration_buffer, "true")==0){
+            s_vibrate = true;
+        } else {
+            s_vibrate = false;
+        }
     }
-    
+
     if(refresh_tuple){
-      snprintf(refresh_buffer, sizeof(refresh_buffer), "%s", refresh_tuple->value->cstring);
-      if (atoi(refresh_buffer) != s_interval){
-        APP_LOG(APP_LOG_LEVEL_INFO, refresh_buffer);
-        s_interval = atoi(refresh_buffer);
-        update_time();
-        tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-      }
+        snprintf(refresh_buffer, sizeof(refresh_buffer), "%s", refresh_tuple->value->cstring);
+        if (atoi(refresh_buffer) != s_interval){
+            APP_LOG(APP_LOG_LEVEL_INFO, refresh_buffer);
+            s_interval = atoi(refresh_buffer);
+            update_time();
+            tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+        }
     }
-    
+
     if(ppl_tuple){
-      snprintf(ppl_buffer, sizeof(ppl_buffer), "%s", ppl_tuple->value->cstring);
-      if (strcmp(ppl_buffer, "true")==0){
-        deinit_ppl();
-        ppl_total=0;
-         } else {
-        ppl_total = persist_exists(KEY_PPL_TOTAL) ? persist_read_int(KEY_PPL_TOTAL) : 4;
-        create_ppl();
-      }
+        snprintf(ppl_buffer, sizeof(ppl_buffer), "%s", ppl_tuple->value->cstring);
+        if (strcmp(ppl_buffer, "true")==0){
+            deinit_ppl();
+            ppl_total=0;
+        } else {
+            ppl_total = persist_exists(KEY_PPL_TOTAL) ? persist_read_int(KEY_PPL_TOTAL) : 4;
+            create_ppl();
+        }
     }
     if(batt_tuple){
-      snprintf(batt_buffer, sizeof(batt_buffer), "%s", batt_tuple->value->cstring);
-      text_layer_set_text(s_batt_layer, batt_buffer);
+        snprintf(batt_buffer, sizeof(batt_buffer), "%s", batt_tuple->value->cstring);
+        text_layer_set_text(s_batt_layer, batt_buffer);
     }
-  
+
     if (cond_tuple){
-      snprintf(cond_buffer, sizeof(cond_buffer), "%s", cond_tuple->value->cstring);
-      if (strcmp(cond_buffer, "clear-day")==0) {
+        snprintf(cond_buffer, sizeof(cond_buffer), "%s", cond_tuple->value->cstring);
+        if (strcmp(cond_buffer, "clear-day")==0) {
             text_layer_set_text(s_cond_layer, "1");
             window_set_background_color(s_main_window, COLOR_FALLBACK(GColorBabyBlueEyes, GColorBlack));
             set_all_text_layer(GColorDarkGray);
@@ -297,11 +297,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
             text_layer_set_text(s_cond_layer, ")");
         }
     }
-    
-    
+
+
     if(temp_tuple){
-      snprintf(temp_buffer, sizeof(temp_buffer), "%d°", (int)temp_tuple->value->int32);
-      text_layer_set_text(s_temp_layer, temp_buffer);
+        snprintf(temp_buffer, sizeof(temp_buffer), "%d°", (int)temp_tuple->value->int32);
+        text_layer_set_text(s_temp_layer, temp_buffer);
     }
     // If all data is available, use it
     if(hightemp_tuple && lowtemp_tuple) {
@@ -327,7 +327,7 @@ static void main_window_load(Window *window) {
     GRect bounds = layer_get_bounds(window_layer);
     s_sizew = bounds.size.w;
     s_time_layer = text_layer_create(
-    GRect(0, -22, bounds.size.w, 80));
+            GRect(0, -22, bounds.size.w, 80));
     text_layer_set_background_color(s_time_layer, GColorClear);
     text_layer_set_text_color(s_time_layer, GColorWhite);
     text_layer_set_text(s_time_layer, "00:00");
@@ -349,8 +349,7 @@ static void main_window_load(Window *window) {
     text_layer_set_font(s_date_layer, s_people_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
     //create People Layer
-    s_people_layer = text_layer_create(
-    GRect(0, 138, bounds.size.w, block_size));
+    s_people_layer = text_layer_create(GRect(0, 138, bounds.size.w, block_size));
     text_layer_set_background_color(s_people_layer, GColorBlack);
     text_layer_set_text_color(s_people_layer, GColorWhite);
     text_layer_set_text_alignment(s_people_layer, GTextAlignmentCenter);
@@ -358,12 +357,12 @@ static void main_window_load(Window *window) {
     text_layer_set_font(s_people_layer, s_people_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_people_layer));
     if (ppl_total != 0) {
-      create_ppl();
+        create_ppl();
     }
-    
+
     //create temperature Layer
     s_temp_layer = text_layer_create(
-    GRect(10, 90, 50, 30));
+            GRect(10, 90, 50, 30));
     text_layer_set_background_color(s_temp_layer, GColorClear);
     text_layer_set_text_color(s_temp_layer, GColorWhite);
     text_layer_set_text_alignment(s_temp_layer, GTextAlignmentLeft);
@@ -372,7 +371,7 @@ static void main_window_load(Window *window) {
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_temp_layer));
     //create conditions Layer
     s_cond_layer = text_layer_create(
-    GRect(47, 88, 50, 50));
+            GRect(47, 88, 50, 50));
     text_layer_set_background_color(s_cond_layer, GColorClear);
     text_layer_set_text_color(s_cond_layer, GColorWhite);
     text_layer_set_text_alignment(s_cond_layer, GTextAlignmentCenter);
@@ -381,7 +380,7 @@ static void main_window_load(Window *window) {
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_cond_layer));
     //create high/low temp Layer
     s_hilo_layer = text_layer_create(
-    GRect(93, 85, 50, 60));
+            GRect(93, 85, 50, 60));
     text_layer_set_background_color(s_hilo_layer, GColorClear);
     text_layer_set_text_color(s_hilo_layer, GColorWhite);
     text_layer_set_text_alignment(s_hilo_layer, GTextAlignmentCenter);
@@ -390,7 +389,7 @@ static void main_window_load(Window *window) {
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_hilo_layer));
     //create battery Layer
     s_batt_layer = text_layer_create(
-    GRect(53, 5, 40, 20));
+            GRect(53, 5, 40, 20));
     text_layer_set_background_color(s_batt_layer, GColorClear);
     text_layer_set_text_color(s_batt_layer, GColorWhite);
     text_layer_set_text_alignment(s_batt_layer, GTextAlignmentCenter);
@@ -399,7 +398,7 @@ static void main_window_load(Window *window) {
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_batt_layer));
     //create shit Layer
     s_shit_layer = text_layer_create(
-    GRect(0, 90, bounds.size.w, 30));
+            GRect(0, 90, bounds.size.w, 30));
     text_layer_set_background_color(s_shit_layer, GColorClear);
     text_layer_set_text_color(s_shit_layer, GColorWhite);
     text_layer_set_text_alignment(s_shit_layer, GTextAlignmentCenter);
@@ -418,7 +417,7 @@ static void main_window_unload(Window *window) {
     text_layer_destroy(s_time_layer);
     text_layer_destroy(s_date_layer);
     deinit_ppl();
-  
+
     text_layer_destroy(s_temp_layer);
     text_layer_destroy(s_cond_layer);
     text_layer_destroy(s_hilo_layer);
@@ -434,9 +433,9 @@ static void init() {
     window_set_background_color(s_main_window, PBL_IF_BW_ELSE(GColorBlack, GColorBabyBlueEyes));
     // Set handlers to manage the elements inside the Window
     window_set_window_handlers(s_main_window, (WindowHandlers) {
-        .load = main_window_load,
-        .unload = main_window_unload
-    });
+            .load = main_window_load,
+            .unload = main_window_unload
+            });
     window_stack_push(s_main_window, true);
     update_time();
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
@@ -445,18 +444,18 @@ static void init() {
     app_message_register_outbox_failed(outbox_failed_callback);
     app_message_register_outbox_sent(outbox_sent_callback);
     app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
-  
+
     // Register for Bluetooth connection updates
     if (s_vibrate) {
-      connection_service_subscribe((ConnectionHandlers) {
-        .pebble_app_connection_handler = bluetooth_callback
-      });
+        connection_service_subscribe((ConnectionHandlers) {
+                .pebble_app_connection_handler = bluetooth_callback
+                });
     }
 }
 static void deinit() {
-  persist_write_int(KEY_REFRESH, s_interval);
-  persist_write_int(KEY_PPL_TOTAL, ppl_total);
-  persist_write_int(KEY_VIBRATE, s_vibrate);
+    persist_write_int(KEY_REFRESH, s_interval);
+    persist_write_int(KEY_PPL_TOTAL, ppl_total);
+    persist_write_int(KEY_VIBRATE, s_vibrate);
     window_destroy(s_main_window);
 }
 int main(void) {
