@@ -457,6 +457,7 @@ static void init() {
     ppl_total = persist_exists(KEY_PPL_TOTAL) ? persist_read_int(KEY_PPL_TOTAL) : 4;
     // Create main Window element and assign to pointer
     s_main_window = window_create();
+    GRect bounds = layer_get_bounds(window_get_root_layer(s_main_window));
     window_set_background_color(s_main_window, PBL_IF_BW_ELSE(GColorBlack, GColorBabyBlueEyes));
     // Set handlers to manage the elements inside the Window
     window_set_window_handlers(s_main_window, (WindowHandlers) {
