@@ -32,6 +32,7 @@ static TextLayer *s_name1_layer;
 static TextLayer *s_name2_layer;
 static TextLayer *s_name3_layer;
 static TextLayer *s_name4_layer;
+static TextLayer *sa_name_layer[5];
 static TextLayer *s_date_layer;
 static TextLayer *s_temp_layer;
 static TextLayer *s_cond_layer;
@@ -92,12 +93,17 @@ static void bluetooth_callback(bool connected) {
 }
 
 static void  deinit_ppl() {
+  for(int i = 1; i <= ppl_total; i++){
+    text_layer_destroy(sa_name_layer[i]);
+  }
+  /*
   if (ppl_total != 0) {
   	text_layer_destroy(s_name1_layer);
     text_layer_destroy(s_name2_layer);
     text_layer_destroy(s_name3_layer);
     text_layer_destroy(s_name4_layer);
   }
+  */
 }
 
 static void create_ppl_layer(TextLayer *s_name_layer) {
@@ -116,26 +122,33 @@ static int get_ppl_pos(double pos) {
 }
 
 static void create_ppl() {
+  for(int i = 1; i <= ppl_total; i++){
+    sa_name_layer[i] = text_layer_create(
+    GRect(get_ppl_pos(i), 0, block_size, block_size));
+    create_ppl_layer(sa_name_layer[i]);
+    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(sa_name_layer[i]));
+  }
+  /*
     //create Zack's Layer
     s_name1_layer = text_layer_create(
-    GRect(get_ppl_pos(1.0), 0, block_size, block_size));
+    GRect(get_ppl_pos(1), 0, block_size, block_size));
     create_ppl_layer(s_name1_layer);
     layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name1_layer));
     //create Sarah's Layer
     s_name2_layer = text_layer_create(
-    GRect(get_ppl_pos(2.0), 0, block_size, block_size));
+    GRect(get_ppl_pos(2), 0, block_size, block_size));
     create_ppl_layer(s_name2_layer);
     layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name2_layer));
     //create Alec's Layer
     s_name3_layer = text_layer_create(
-    GRect(get_ppl_pos(3.0), 0, block_size, block_size));
+    GRect(get_ppl_pos(3), 0, block_size, block_size));
     create_ppl_layer(s_name3_layer);
     layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name3_layer));
     //create Melissa's Layer
     s_name4_layer = text_layer_create(
-    GRect(get_ppl_pos(4.0), 0, block_size, block_size));
+    GRect(get_ppl_pos(4), 0, block_size, block_size));
     create_ppl_layer(s_name4_layer);
-    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name4_layer));
+    layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(s_name4_layer));*/
 }
 
 static void update_time() {
@@ -182,16 +195,19 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     static char vibration_buffer[8];
     static char ppl_buffer[8];
     static char ppl_total_buffer[8];
+  static char buffer[5][8];
+  Tuple *name_tuple[5];
+  Tuple *value_tuple[5];
   
     // Read tuples for data
-    Tuple *name1_tuple = dict_find(iterator, KEY_NAME1);
-    Tuple *name2_tuple = dict_find(iterator, KEY_NAME2);
-    Tuple *name3_tuple = dict_find(iterator, KEY_NAME3);
-    Tuple *name4_tuple = dict_find(iterator, KEY_NAME4);
-    Tuple *value1_tuple = dict_find(iterator, KEY_VALUE1);
-    Tuple *value2_tuple = dict_find(iterator, KEY_VALUE2);
-    Tuple *value3_tuple = dict_find(iterator, KEY_VALUE3);
-    Tuple *value4_tuple = dict_find(iterator, KEY_VALUE4);
+    name_tuple[1] = dict_find(iterator, KEY_NAME1);
+    name_tuple[2] = dict_find(iterator, KEY_NAME2);
+    name_tuple[3] = dict_find(iterator, KEY_NAME3);
+    name_tuple[4] = dict_find(iterator, KEY_NAME4);
+    value_tuple[1] = dict_find(iterator, KEY_VALUE1);
+    value_tuple[2] = dict_find(iterator, KEY_VALUE2);
+    value_tuple[3] = dict_find(iterator, KEY_VALUE3);
+    value_tuple[4] = dict_find(iterator, KEY_VALUE4);
     Tuple *temp_tuple = dict_find(iterator, KEY_TEMP);
     Tuple *hightemp_tuple = dict_find(iterator, KEY_HIGHTEMP);
     Tuple *lowtemp_tuple = dict_find(iterator, KEY_LOWTEMP);
@@ -201,10 +217,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     Tuple *vibration_tuple = dict_find(iterator, KEY_VIBRATE);
     Tuple *ppl_tuple = dict_find(iterator, KEY_PPL);
     Tuple *ppl_total_tuple = dict_find(iterator, KEY_PPL_TOTAL);
-    static char name1_buffer[2];
-    static char name2_buffer[2];
-    static char name3_buffer[2];
-    static char name4_buffer[2];
   
     if(ppl_total_tuple){
       snprintf(ppl_total_buffer, sizeof(ppl_total_buffer), "%s", ppl_total_tuple->value->cstring);
@@ -222,10 +234,13 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       }
       
     }
-    set_ppl(1,name1_buffer, name1_tuple, value1_tuple, s_name1_layer);
-    set_ppl(2,name2_buffer, name2_tuple, value2_tuple, s_name2_layer);
-    set_ppl(3,name3_buffer, name3_tuple, value3_tuple, s_name3_layer);
-    set_ppl(4,name4_buffer, name4_tuple, value4_tuple, s_name4_layer);
+  
+    for(int i = 1; i <= ppl_total; i++){
+       name_tuple[i] = dict_find(iterator, i-1);
+       value_tuple[i] = dict_find(iterator, i+9);
+       set_ppl(i,buffer[i], name_tuple[i], value_tuple[i], sa_name_layer[i]);
+    }
+
     if(s_changed){
       s_changed = false;
       if(s_vibrate){
@@ -457,7 +472,6 @@ static void init() {
     ppl_total = persist_exists(KEY_PPL_TOTAL) ? persist_read_int(KEY_PPL_TOTAL) : 4;
     // Create main Window element and assign to pointer
     s_main_window = window_create();
-    GRect bounds = layer_get_bounds(window_get_root_layer(s_main_window));
     window_set_background_color(s_main_window, PBL_IF_BW_ELSE(GColorBlack, GColorBabyBlueEyes));
     // Set handlers to manage the elements inside the Window
     window_set_window_handlers(s_main_window, (WindowHandlers) {
@@ -491,5 +505,3 @@ int main(void) {
     app_event_loop();
     deinit();
 }
-
-
