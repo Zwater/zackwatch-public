@@ -183,9 +183,10 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       APP_LOG(APP_LOG_LEVEL_INFO, ppl_buff);*/
       if (ppl_total != 0) {
         if (atoi(ppl_total_buffer) != ppl_total){
+            //deinit before changing ppl_total
+            deinit_ppl();
           APP_LOG(APP_LOG_LEVEL_INFO, ppl_total_buffer);
           ppl_total = atoi(ppl_total_buffer);
-          deinit_ppl();
           create_ppl();
           //if number of people change, then have to wait till next refresh 
         }
