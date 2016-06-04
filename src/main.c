@@ -307,11 +307,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
         for(int i = 1; i <= ppl_total; i++){
            if (s_ppl[i] == 0){
-            text_layer_set_background_color(sa_name_layer[i], COLOR_FALLBACK(text, GColorWhite));
-            text_layer_set_text_color(sa_name_layer[i], bg);
-           } else {
-            text_layer_set_background_color(sa_name_layer[i], COLOR_FALLBACK(bg, bwbg));
+            text_layer_set_background_color(sa_name_layer[i], COLOR_FALLBACK(bg, GColorWhite));
             text_layer_set_text_color(sa_name_layer[i], text);
+           } else {
+            text_layer_set_background_color(sa_name_layer[i], COLOR_FALLBACK(text, bwbg));
+            text_layer_set_text_color(sa_name_layer[i], bg);
            }
         }
     }
