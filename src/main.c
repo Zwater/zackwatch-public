@@ -45,9 +45,9 @@ static GFont s_batt_font;
 static char s_ppl[6];
 static bool s_changed = false;
 static int s_sizew;
-static GColor text = GColorDarkGray;
-static GColor bg = GColorBabyBlueEyes;
-static GColor bwbg = GColorBlack;
+static GColor text;
+static GColor bg;
+static GColor bwbg;
 
 static void set_all_text_layer(GColor color) {
     text_layer_set_text_color(s_time_layer, COLOR_FALLBACK(color, GColorWhite));
@@ -69,15 +69,15 @@ static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value
       if (strcmp(value_buffer, "1")==0){
         //prevent re-draw if not required etc
         if (s_ppl[ppl] ==0){
-          text_layer_set_background_color(s_name_layer, GColorWhite);
-          text_layer_set_text_color(s_name_layer, GColorBlack);
+          text_layer_set_background_color(s_name_layer, text);
+          text_layer_set_text_color(s_name_layer, bg);
           s_changed = true;
           s_ppl[ppl] = 1;
         }
       } else {
         if (s_ppl[ppl] ==1){
-            text_layer_set_background_color(s_name_layer, GColorBlack);
-            text_layer_set_text_color(s_name_layer, GColorWhite);
+            text_layer_set_background_color(s_name_layer, bg);
+            text_layer_set_text_color(s_name_layer, text);
             s_changed = true;
             s_ppl[ppl] = 0;
           }
@@ -305,11 +305,16 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         }
         window_set_background_color(s_main_window, COLOR_FALLBACK(bg, bwbg));
         set_all_text_layer(text);
-        /* Maybe set enabled color
+
         for(int i = 1; i <= ppl_total; i++){
-            text_layer_set_background_color(sa_name_layer[i], COLOR_FALLBACK(bg, bwbg));
+           if (s_ppl[i] == 0){
+            text_layer_set_background_color(sa_name_layer[i], COLOR_FALLBACK(bg, GColorWhite));
             text_layer_set_text_color(sa_name_layer[i], text);
-        }*/
+           } else {
+            text_layer_set_background_color(sa_name_layer[i], COLOR_FALLBACK(text, bwbg));
+            text_layer_set_text_color(sa_name_layer[i], bg);
+           }
+        }
     }
 
 
@@ -364,8 +369,8 @@ static void main_window_load(Window *window) {
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
     //create People Layer
     s_people_layer = text_layer_create(GRect(0, 138, bounds.size.w, block_size));
-    text_layer_set_background_color(s_people_layer, GColorBlack);
-    text_layer_set_text_color(s_people_layer, GColorWhite);
+    text_layer_set_background_color(s_people_layer, GColorClear);
+    text_layer_set_text_color(s_people_layer, text);
     text_layer_set_text_alignment(s_people_layer, GTextAlignmentCenter);
     text_layer_set_text(s_people_layer, "");
     text_layer_set_font(s_people_layer, s_people_font);
@@ -442,6 +447,9 @@ static void init() {
     s_vibrate = persist_exists(KEY_VIBRATE) ? persist_read_int(KEY_VIBRATE) : true;
     s_interval = persist_exists(KEY_REFRESH) ? persist_read_int(KEY_REFRESH) : 5;
     ppl_total = persist_exists(KEY_PPL_TOTAL) ? persist_read_int(KEY_PPL_TOTAL) : 4;
+    text = GColorDarkGray;
+    bg = GColorBabyBlueEyes;
+    bwbg = GColorBlack;
     // Create main Window element and assign to pointer
     s_main_window = window_create();
     window_set_background_color(s_main_window, PBL_IF_BW_ELSE(GColorBlack, GColorBabyBlueEyes));
