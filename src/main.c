@@ -287,6 +287,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         else if (strcmp(cond_buffer, "wind")==0) {
             text_layer_set_text(s_cond_layer, "F");
             bg = GColorBlack;
+            bwbg = GColorWhite;
             text = GColorBlack;
         }
         else if (strcmp(cond_buffer, "fog")==0) {
