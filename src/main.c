@@ -45,6 +45,9 @@ static GFont s_batt_font;
 static char s_ppl[6];
 static bool s_changed = false;
 static int s_sizew;
+static GColor text = GColorDarkGray;
+static GColor bg = GColorBabyBlueEyes;
+static GColor bwbg = GColorBlack;
 
 static void set_all_text_layer(GColor color) {
     text_layer_set_text_color(s_time_layer, COLOR_FALLBACK(color, GColorWhite));
@@ -244,59 +247,68 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
     if (cond_tuple){
         snprintf(cond_buffer, sizeof(cond_buffer), "%s", cond_tuple->value->cstring);
+        bwbg = GColorBlack;
         if (strcmp(cond_buffer, "clear-day")==0) {
             text_layer_set_text(s_cond_layer, "1");
-            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorBabyBlueEyes, GColorBlack));
-            set_all_text_layer(GColorDarkGray);
+            bg = GColorBabyBlueEyes;
+            text = GColorDarkGray;
         }
         else if (strcmp(cond_buffer, "partly-cloudy-day")==0) {
             text_layer_set_text(s_cond_layer, "3");
-            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorBlue, GColorBlack));
-            set_all_text_layer(GColorLightGray);
+            bg = GColorBlue;
+            text = GColorLightGray;
         }
         else if (strcmp(cond_buffer, "cloudy")==0) {
             text_layer_set_text(s_cond_layer, "5");
-            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorDarkGray, GColorBlack));
-            set_all_text_layer(GColorWhite);
+            bg = GColorDarkGray;
+            text = GColorWhite;
         }
         else if (strcmp(cond_buffer, "clear-night")==0) {
             text_layer_set_text(s_cond_layer, "2");
-            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorOxfordBlue, GColorBlack));
-            set_all_text_layer(GColorWhite);
+            bg = GColorOxfordBlue;
+            text = GColorWhite;
         }
         else if (strcmp(cond_buffer, "rain")==0) {
             text_layer_set_text(s_cond_layer, "8");
-            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorOxfordBlue, GColorBlack));
-            set_all_text_layer(GColorPictonBlue);
+            bg = GColorOxfordBlue;
+            text = GColorPictonBlue;
         }
         else if (strcmp(cond_buffer, "snow")==0) {
             text_layer_set_text(s_cond_layer, "#");
-            window_set_background_color(s_main_window, PBL_IF_BW_ELSE(GColorBlack,GColorWhite));
-            set_all_text_layer(GColorPictonBlue);
+            bg = GColorBlack;
+            bwbg = GColorWhite;
+            text = GColorPictonBlue;
         }
         else if (strcmp(cond_buffer, "sleet")==0) {
             text_layer_set_text(s_cond_layer, "$");
-            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorCeleste, GColorBlack));
-            set_all_text_layer(GColorBlue);
+            bg = GColorCeleste;
+            text = GColorBlue;
         }
         else if (strcmp(cond_buffer, "wind")==0) {
             text_layer_set_text(s_cond_layer, "F");
-            window_set_background_color(s_main_window, PBL_IF_BW_ELSE(GColorBlack,GColorWhite));
-            set_all_text_layer(GColorBlack);
+            bg = GColorBlack;
+            text = GColorBlack;
         }
         else if (strcmp(cond_buffer, "fog")==0) {
             text_layer_set_text(s_cond_layer, "M");
-            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorLightGray, GColorBlack));
-            set_all_text_layer(GColorBlack);
+            bg = GColorLightGray;
+            text = GColorBlack;
         }
         else if (strcmp(cond_buffer, "partly-cloudy-night")==0) {
             text_layer_set_text(s_cond_layer, "4");
-            window_set_background_color(s_main_window, COLOR_FALLBACK(GColorOxfordBlue, GColorBlack));
-            set_all_text_layer(GColorLightGray);
+            bg = GColorOxfordBlue;
+            text = GColorLightGray;
         }
         else {
             text_layer_set_text(s_cond_layer, ")");
         }
+        window_set_background_color(s_main_window, COLOR_FALLBACK(bg, bwbg));
+        set_all_text_layer(text);
+        /* Maybe set enabled color
+        for(int i = 1; i <= ppl_total; i++){
+            text_layer_set_background_color(sa_name_layer[i], COLOR_FALLBACK(bg, bwbg));
+            text_layer_set_text_color(sa_name_layer[i], text);
+        }*/
     }
 
 
