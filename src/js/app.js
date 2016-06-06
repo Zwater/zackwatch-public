@@ -8,7 +8,7 @@ var myAPIKey = localStorage.getItem('apikey');
 var mypplurl = localStorage.getItem('ppl');
 var latitude = localStorage.getItem('latitude');
 var longitude = localStorage.getItem('longitude');
-var defaultlocOnly = localStorage.getItem('defaultlocOnly');
+var defaultlocOnly = Boolean(localStorage.getItem('defaultlocOnly') == "True");
 var metric = localStorage.getItem('metric');
 var ppl_disable = localStorage.getItem('ppldisable');
 var refresh = localStorage.getItem('refresh');
@@ -82,6 +82,7 @@ function getPeople(latitude, longitude, weather) {
   // myAPIKey + '/' pos.coords.latitude + ',' + pos.coords.longitude + '?exclude=minutely,hourly,alerts,flags';
   var url = 'https://api.forecast.io/forecast/' +
     myAPIKey + '/' + latitude + ',' + longitude;
+    console.log('url is' + url)
 
   // Send request to Forecast.io
   xhrRequest(url, 'GET',
@@ -126,10 +127,12 @@ function getPeople(latitude, longitude, weather) {
 
 
 function getWeather() {
-
+console.log(defaultlocOnly + ' is ' + typeof defaultlocOnly);
   if (defaultlocOnly) {
     getPeople(latitude, longitude, true);
+    console.log('getting people with default loc.');
   } else {
+    console.log('getting position for non-default weather');
     navigator.geolocation.getCurrentPosition(
       locSuccess,
       locFailure, {
