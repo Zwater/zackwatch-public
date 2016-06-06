@@ -48,6 +48,8 @@ static int s_sizew;
 static GColor text;
 static GColor bg;
 static GColor bwbg;
+static char *s_cond="1";
+static char *s_prev_cond="BO";
 
 static void set_all_text_layer(GColor color) {
     text_layer_set_text_color(s_time_layer, COLOR_FALLBACK(color, GColorWhite));
@@ -152,6 +154,13 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
         app_message_outbox_send();
     }
 }
+
+static void set_colors() {
+    text_layer_set_text(s_cond_layer, s_cond);
+    window_set_background_color(s_main_window, COLOR_FALLBACK(bg, bwbg));
+    set_all_text_layer(text);
+}
+
 //static GFont s_date_font;
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
     text_layer_set_text(s_shit_layer, "");
@@ -248,63 +257,71 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     if (cond_tuple){
         snprintf(cond_buffer, sizeof(cond_buffer), "%s", cond_tuple->value->cstring);
         bwbg = GColorBlack;
+        snprintf(s_prev_cond, sizeof(s_prev_cond), "%s", s_cond);
+        s_cond="1";
         if (strcmp(cond_buffer, "clear-day")==0) {
-            text_layer_set_text(s_cond_layer, "1");
+            s_cond="1";
             bg = GColorBabyBlueEyes;
             text = GColorDarkGray;
         }
         else if (strcmp(cond_buffer, "partly-cloudy-day")==0) {
-            text_layer_set_text(s_cond_layer, "3");
+            s_cond="3";
             bg = GColorBlue;
             text = GColorLightGray;
         }
         else if (strcmp(cond_buffer, "cloudy")==0) {
-            text_layer_set_text(s_cond_layer, "5");
+            s_cond="5";
             bg = GColorDarkGray;
             text = GColorWhite;
         }
         else if (strcmp(cond_buffer, "clear-night")==0) {
-            text_layer_set_text(s_cond_layer, "2");
+            s_cond="2";
             bg = GColorOxfordBlue;
             text = GColorWhite;
         }
         else if (strcmp(cond_buffer, "rain")==0) {
-            text_layer_set_text(s_cond_layer, "8");
+            s_cond="8";
             bg = GColorOxfordBlue;
             text = GColorPictonBlue;
         }
         else if (strcmp(cond_buffer, "snow")==0) {
-            text_layer_set_text(s_cond_layer, "#");
+            s_cond="#";
             bg = GColorBlack;
             bwbg = GColorWhite;
             text = GColorPictonBlue;
         }
         else if (strcmp(cond_buffer, "sleet")==0) {
-            text_layer_set_text(s_cond_layer, "$");
+            s_cond="$";
             bg = GColorCeleste;
             text = GColorBlue;
         }
         else if (strcmp(cond_buffer, "wind")==0) {
-            text_layer_set_text(s_cond_layer, "F");
+            s_cond="F";
             bg = GColorBlack;
             bwbg = GColorWhite;
             text = GColorBlack;
         }
         else if (strcmp(cond_buffer, "fog")==0) {
-            text_layer_set_text(s_cond_layer, "M");
+            s_cond="M";
             bg = GColorLightGray;
             text = GColorBlack;
         }
         else if (strcmp(cond_buffer, "partly-cloudy-night")==0) {
-            text_layer_set_text(s_cond_layer, "4");
+            s_cond="4";
             bg = GColorOxfordBlue;
             text = GColorLightGray;
         }
         else {
-            text_layer_set_text(s_cond_layer, ")");
+            s_cond=")";
         }
-        window_set_background_color(s_main_window, COLOR_FALLBACK(bg, bwbg));
-        set_all_text_layer(text);
+
+        if (strcmp(s_cond, s_prev_cond)!=0) {
+            set_colors();
+            /*
+            text_layer_set_text(s_cond_layer, s_cond);
+            window_set_background_color(s_main_window, COLOR_FALLBACK(bg, bwbg));
+            set_all_text_layer(text);*/
+        }
 
         for(int i = 1; i <= ppl_total; i++){
            if (s_ppl[i] == 0){
@@ -330,6 +347,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         text_layer_set_text(s_hilo_layer, hilo_buffer);
     }
 }
+
+
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
 }
