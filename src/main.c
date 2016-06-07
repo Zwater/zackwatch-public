@@ -19,7 +19,7 @@
 #define KEY_PPL 15
 #define KEY_REFRESH 16
 #define KEY_VIBRATE 18
-
+#define KEY_PCOND 19
 /*json file looks like
   {A":"1", "B":"1", "C":"0", D":"0"}
   */
@@ -43,6 +43,7 @@ static GFont s_weather_font;
 static GFont s_dinsmall_font;
 static GFont s_batt_font;
 static char s_ppl[6];
+static char *s_ppl_name[6];
 static bool s_changed = false;
 static int s_sizew;
 static GColor text;
@@ -50,6 +51,12 @@ static GColor bg;
 static GColor bwbg;
 static char *s_cond="1";
 static char *s_prev_cond="BO";
+static char cond_buffer[64];
+static char *s_shit;
+static char temp_buffer[6];
+static char hilo_buffer[16];
+static char hightemp_buffer[6];
+static char lowtemp_buffer[6];
 
 static void set_all_text_layer(GColor color) {
     text_layer_set_text_color(s_time_layer, COLOR_FALLBACK(color, GColorWhite));
@@ -60,31 +67,35 @@ static void set_all_text_layer(GColor color) {
     text_layer_set_text_color(s_batt_layer, COLOR_FALLBACK(color, GColorWhite));
 }
 
+
+
 static void set_ppl(int ppl, char *name_buffer, Tuple *name_tuple,  Tuple *value_tuple,  TextLayer *s_name_layer) {
 
     static char value_buffer[2];
     if (name_tuple && value_tuple) {
         snprintf(name_buffer, sizeof(name_buffer), "%s", name_tuple->value->cstring);
         snprintf(value_buffer, sizeof(value_buffer), "%s", value_tuple->value->cstring);
+        snprintf(s_ppl_name[ppl], sizeof(name_buffer), "%s", name_buffer);
+
+
         text_layer_set_text(s_name_layer, name_buffer);
-
-      if (strcmp(value_buffer, "1")==0){
-        //prevent re-draw if not required etc
-        if (s_ppl[ppl] ==0){
-          text_layer_set_background_color(s_name_layer, text);
-          text_layer_set_text_color(s_name_layer, bg);
-          s_changed = true;
-          s_ppl[ppl] = 1;
+    
+        if (strcmp(value_buffer, "1")==0){
+            //prevent re-draw if not required etc
+            if (s_ppl[ppl] ==0){
+                text_layer_set_background_color(s_name_layer, text);
+                text_layer_set_text_color(s_name_layer, bg);
+                s_changed = true;
+                s_ppl[ppl] = 1;
+            }
+        } else {
+            if (s_ppl[ppl] ==1){
+                text_layer_set_background_color(s_name_layer, bg);
+                text_layer_set_text_color(s_name_layer, text);
+                s_changed = true;
+                s_ppl[ppl] = 0;
+            }
         }
-      } else {
-        if (s_ppl[ppl] ==1){
-            text_layer_set_background_color(s_name_layer, bg);
-            text_layer_set_text_color(s_name_layer, text);
-            s_changed = true;
-            s_ppl[ppl] = 0;
-          }
-      }
-
     }
 
 }
@@ -161,23 +172,77 @@ static void set_colors() {
     set_all_text_layer(text);
 }
 
+static void set_cond_color(char *cond_buffer) {
+    s_cond="1";
+    if (strcmp(cond_buffer, "clear-day")==0) {
+        s_cond="1";
+        bg = GColorBabyBlueEyes;
+        text = GColorDarkGray;
+    }
+    else if (strcmp(cond_buffer, "partly-cloudy-day")==0) {
+        s_cond="3";
+        bg = GColorBlue;
+        text = GColorLightGray;
+    }
+    else if (strcmp(cond_buffer, "cloudy")==0) {
+        s_cond="5";
+        bg = GColorDarkGray;
+        text = GColorWhite;
+    }
+    else if (strcmp(cond_buffer, "clear-night")==0) {
+        s_cond="2";
+        bg = GColorOxfordBlue;
+        text = GColorWhite;
+    }
+    else if (strcmp(cond_buffer, "rain")==0) {
+        s_cond="8";
+        bg = GColorOxfordBlue;
+        text = GColorPictonBlue;
+    }
+    else if (strcmp(cond_buffer, "snow")==0) {
+        s_cond="#";
+        bg = GColorBlack;
+        bwbg = GColorWhite;
+        text = GColorPictonBlue;
+    }
+    else if (strcmp(cond_buffer, "sleet")==0) {
+        s_cond="$";
+        bg = GColorCeleste;
+        text = GColorBlue;
+    }
+    else if (strcmp(cond_buffer, "wind")==0) {
+        s_cond="F";
+        bg = GColorBlack;
+        bwbg = GColorWhite;
+        text = GColorBlack;
+    }
+    else if (strcmp(cond_buffer, "fog")==0) {
+        s_cond="M";
+        bg = GColorLightGray;
+        text = GColorBlack;
+    }
+    else if (strcmp(cond_buffer, "partly-cloudy-night")==0) {
+        s_cond="4";
+        bg = GColorOxfordBlue;
+        text = GColorLightGray;
+    }
+    else {
+        s_cond=")";
+    }
+}
+
 //static GFont s_date_font;
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
     text_layer_set_text(s_shit_layer, "");
     // Store incoming information
-    static char temp_buffer[6];
-    static char hightemp_buffer[6];
-    static char lowtemp_buffer[6];
-    static char cond_buffer[64];
-    static char hilo_buffer[16];
     static char batt_buffer[8];
     static char refresh_buffer[8];
     static char vibration_buffer[8];
     static char ppl_buffer[8];
     static char ppl_total_buffer[8];
-    static char buffer[5][8];
-    Tuple *name_tuple[5];
-    Tuple *value_tuple[5];
+    static char buffer[6][8];
+    Tuple *name_tuple[6];
+    Tuple *value_tuple[6];
 
     Tuple *temp_tuple = dict_find(iterator, KEY_TEMP);
     Tuple *hightemp_tuple = dict_find(iterator, KEY_HIGHTEMP);
@@ -191,14 +256,10 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
     if(ppl_total_tuple){
         snprintf(ppl_total_buffer, sizeof(ppl_total_buffer), "%s", ppl_total_tuple->value->cstring);
-        /*static char ppl_buff[2];
-          snprintf(ppl_buff, sizeof(ppl_buff), "%i",ppl_total);
-          APP_LOG(APP_LOG_LEVEL_INFO, ppl_buff);*/
         if (ppl_total != 0) {
             if (atoi(ppl_total_buffer) != ppl_total){
                 //deinit before changing ppl_total
                 deinit_ppl();
-                APP_LOG(APP_LOG_LEVEL_INFO, ppl_total_buffer);
                 ppl_total = atoi(ppl_total_buffer);
                 create_ppl();
                 //if number of people change, then have to wait till next refresh 
@@ -232,7 +293,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     if(refresh_tuple){
         snprintf(refresh_buffer, sizeof(refresh_buffer), "%s", refresh_tuple->value->cstring);
         if (atoi(refresh_buffer) != s_interval){
-            APP_LOG(APP_LOG_LEVEL_INFO, refresh_buffer);
             s_interval = atoi(refresh_buffer);
             update_time();
             tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
@@ -258,69 +318,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         snprintf(cond_buffer, sizeof(cond_buffer), "%s", cond_tuple->value->cstring);
         bwbg = GColorBlack;
         snprintf(s_prev_cond, sizeof(s_prev_cond), "%s", s_cond);
-        s_cond="1";
-        if (strcmp(cond_buffer, "clear-day")==0) {
-            s_cond="1";
-            bg = GColorBabyBlueEyes;
-            text = GColorDarkGray;
-        }
-        else if (strcmp(cond_buffer, "partly-cloudy-day")==0) {
-            s_cond="3";
-            bg = GColorBlue;
-            text = GColorLightGray;
-        }
-        else if (strcmp(cond_buffer, "cloudy")==0) {
-            s_cond="5";
-            bg = GColorDarkGray;
-            text = GColorWhite;
-        }
-        else if (strcmp(cond_buffer, "clear-night")==0) {
-            s_cond="2";
-            bg = GColorOxfordBlue;
-            text = GColorWhite;
-        }
-        else if (strcmp(cond_buffer, "rain")==0) {
-            s_cond="8";
-            bg = GColorOxfordBlue;
-            text = GColorPictonBlue;
-        }
-        else if (strcmp(cond_buffer, "snow")==0) {
-            s_cond="#";
-            bg = GColorBlack;
-            bwbg = GColorWhite;
-            text = GColorPictonBlue;
-        }
-        else if (strcmp(cond_buffer, "sleet")==0) {
-            s_cond="$";
-            bg = GColorCeleste;
-            text = GColorBlue;
-        }
-        else if (strcmp(cond_buffer, "wind")==0) {
-            s_cond="F";
-            bg = GColorBlack;
-            bwbg = GColorWhite;
-            text = GColorBlack;
-        }
-        else if (strcmp(cond_buffer, "fog")==0) {
-            s_cond="M";
-            bg = GColorLightGray;
-            text = GColorBlack;
-        }
-        else if (strcmp(cond_buffer, "partly-cloudy-night")==0) {
-            s_cond="4";
-            bg = GColorOxfordBlue;
-            text = GColorLightGray;
-        }
-        else {
-            s_cond=")";
-        }
-
+        
+        set_cond_color(cond_buffer);
+       
         if (strcmp(s_cond, s_prev_cond)!=0) {
             set_colors();
-            /*
-            text_layer_set_text(s_cond_layer, s_cond);
-            window_set_background_color(s_main_window, COLOR_FALLBACK(bg, bwbg));
-            set_all_text_layer(text);*/
         }
 
         for(int i = 1; i <= ppl_total; i++){
@@ -341,8 +343,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     // If all data is available, use it
     if(hightemp_tuple && lowtemp_tuple) {
-        snprintf(hightemp_buffer, sizeof(hightemp_buffer), "%s", hightemp_tuple->value->cstring);
-        snprintf(lowtemp_buffer, sizeof(lowtemp_buffer), "%s", lowtemp_tuple->value->cstring);
+        snprintf(hightemp_buffer, sizeof(hightemp_buffer), "%d", (int)hightemp_tuple->value->int32);
+        snprintf(lowtemp_buffer, sizeof(lowtemp_buffer), "%d", (int)lowtemp_tuple->value->int32);
         snprintf(hilo_buffer, sizeof(hilo_buffer), "%d°\n%d°", (int)hightemp_tuple->value->int32, (int)lowtemp_tuple->value->int32);
         text_layer_set_text(s_hilo_layer, hilo_buffer);
     }
@@ -367,7 +369,7 @@ static void main_window_load(Window *window) {
     s_time_layer = text_layer_create(
             GRect(0, -22, bounds.size.w, 80));
     text_layer_set_background_color(s_time_layer, GColorClear);
-    text_layer_set_text_color(s_time_layer, GColorWhite);
+    //text_layer_set_text_color(s_time_layer, GColorWhite);
     text_layer_set_text(s_time_layer, "00:00");
     text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
     // Create Fonts
@@ -381,7 +383,7 @@ static void main_window_load(Window *window) {
     layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
     // Create date TextLayer
     s_date_layer = text_layer_create(GRect(0, 55, bounds.size.w, 30));
-    text_layer_set_text_color(s_date_layer, GColorWhite);
+    //text_layer_set_text_color(s_date_layer, GColorWhite);
     text_layer_set_background_color(s_date_layer, GColorClear);
     text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
     text_layer_set_font(s_date_layer, s_people_font);
@@ -402,34 +404,34 @@ static void main_window_load(Window *window) {
     s_temp_layer = text_layer_create(
             GRect(10, 90, 50, 30));
     text_layer_set_background_color(s_temp_layer, GColorClear);
-    text_layer_set_text_color(s_temp_layer, GColorWhite);
+    //text_layer_set_text_color(s_temp_layer, GColorWhite);
     text_layer_set_text_alignment(s_temp_layer, GTextAlignmentLeft);
-    text_layer_set_text(s_temp_layer, "");
+    text_layer_set_text(s_temp_layer, temp_buffer);
     text_layer_set_font(s_temp_layer, s_people_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_temp_layer));
     //create conditions Layer
     s_cond_layer = text_layer_create(
             GRect(47, 88, 50, 50));
     text_layer_set_background_color(s_cond_layer, GColorClear);
-    text_layer_set_text_color(s_cond_layer, GColorWhite);
+    //text_layer_set_text_color(s_cond_layer, GColorWhite);
     text_layer_set_text_alignment(s_cond_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_cond_layer, "");
+    text_layer_set_text(s_cond_layer, s_cond);
     text_layer_set_font(s_cond_layer, s_weather_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_cond_layer));
     //create high/low temp Layer
     s_hilo_layer = text_layer_create(
             GRect(93, 85, 50, 60));
     text_layer_set_background_color(s_hilo_layer, GColorClear);
-    text_layer_set_text_color(s_hilo_layer, GColorWhite);
+    //text_layer_set_text_color(s_hilo_layer, GColorWhite);
     text_layer_set_text_alignment(s_hilo_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_hilo_layer, "");
+    text_layer_set_text(s_hilo_layer, hilo_buffer);
     text_layer_set_font(s_hilo_layer, s_dinsmall_font);
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_hilo_layer));
     //create battery Layer
     s_batt_layer = text_layer_create(
             GRect(53, 5, 40, 20));
     text_layer_set_background_color(s_batt_layer, GColorClear);
-    text_layer_set_text_color(s_batt_layer, GColorWhite);
+    //text_layer_set_text_color(s_batt_layer, GColorWhite);
     text_layer_set_text_alignment(s_batt_layer, GTextAlignmentCenter);
     text_layer_set_text(s_batt_layer, "");
     text_layer_set_font(s_batt_layer, s_batt_font);
@@ -438,11 +440,17 @@ static void main_window_load(Window *window) {
     s_shit_layer = text_layer_create(
             GRect(0, 90, bounds.size.w, 30));
     text_layer_set_background_color(s_shit_layer, GColorClear);
-    text_layer_set_text_color(s_shit_layer, GColorWhite);
+    //text_layer_set_text_color(s_shit_layer, GColorWhite);
     text_layer_set_text_alignment(s_shit_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_shit_layer, "Loading...");
+    text_layer_set_text(s_shit_layer, s_shit);
     text_layer_set_font(s_shit_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_shit_layer));
+    set_colors();
+    /*
+    for(int i = 1; i <= ppl_total; i++){
+        
+        //set_ppl_str(i, buffer[i], s_ppl_name[i], s_ppl[i], sa_name_layer[i]);
+    }*/
 }
 static void main_window_unload(Window *window) {
     // Unload Fonts
@@ -462,16 +470,53 @@ static void main_window_unload(Window *window) {
     text_layer_destroy(s_batt_layer);
     text_layer_destroy(s_shit_layer);
 }
-static void init() {
+
+static void get_values() {
     s_vibrate = persist_exists(KEY_VIBRATE) ? persist_read_int(KEY_VIBRATE) : true;
     s_interval = persist_exists(KEY_REFRESH) ? persist_read_int(KEY_REFRESH) : 5;
     ppl_total = persist_exists(KEY_PPL_TOTAL) ? persist_read_int(KEY_PPL_TOTAL) : 4;
-    text = GColorDarkGray;
-    bg = GColorBabyBlueEyes;
-    bwbg = GColorBlack;
+    /*
+    for(int i = 1; i <= ppl_total; i++){
+        //if (persist_exists(i+9)) {persist_read_data(i+9, &s_ppl[i], sizeof(&s_ppl[i])); }
+        s_ppl[i] = persist_exists(i+9) ? persist_read_int(i+9) : 0;
+        if (persist_exists(i-1)) { persist_read_data(i-1, &s_ppl_name[i], sizeof(&s_ppl_name[i])); }
+        APP_LOG(APP_LOG_LEVEL_ERROR, s_ppl_name[i]);
+        APP_LOG(APP_LOG_LEVEL_ERROR, &s_ppl[i]);
+    }*/
+    if (persist_exists(KEY_TEMP)) {
+        persist_read_data(KEY_TEMP, &temp_buffer, sizeof(temp_buffer));
+    }
+
+    if (persist_exists(KEY_LOWTEMP)) {
+        persist_read_data(KEY_LOWTEMP, &lowtemp_buffer, sizeof(lowtemp_buffer));
+        if (persist_exists(KEY_HIGHTEMP)) {
+            persist_read_data(KEY_HIGHTEMP, &hightemp_buffer, sizeof(hightemp_buffer));
+        } 
+        snprintf(hilo_buffer, sizeof(hilo_buffer), "%s°\n%s°", hightemp_buffer, lowtemp_buffer);
+    } 
+
+
+    //char cond[64];
+    if (persist_exists(KEY_COND)) {
+        persist_read_data(KEY_COND, &cond_buffer, sizeof(cond_buffer));
+        set_cond_color(cond_buffer);
+        //set_colors();
+    } else {
+        s_cond=")";
+        text = GColorDarkGray;
+        bg = GColorBabyBlueEyes;
+        bwbg = GColorBlack;
+        s_shit="Loading...";
+    }
+
+}
+
+static void init() {
+    get_values();
+    
     // Create main Window element and assign to pointer
     s_main_window = window_create();
-    window_set_background_color(s_main_window, PBL_IF_BW_ELSE(GColorBlack, GColorBabyBlueEyes));
+    //window_set_background_color(s_main_window, PBL_IF_BW_ELSE(GColorBlack, GColorBabyBlueEyes));
     // Set handlers to manage the elements inside the Window
     window_set_window_handlers(s_main_window, (WindowHandlers) {
             .load = main_window_load,
@@ -492,11 +537,29 @@ static void init() {
                 .pebble_app_connection_handler = bluetooth_callback
                 });
     }
+    //set_colors();
 }
 static void deinit() {
     persist_write_int(KEY_REFRESH, s_interval);
     persist_write_int(KEY_PPL_TOTAL, ppl_total);
     persist_write_int(KEY_VIBRATE, s_vibrate);
+    if (persist_exists(KEY_COND)) { persist_delete(KEY_COND); }
+    persist_write_string(KEY_COND, cond_buffer);
+    if (persist_exists(KEY_HIGHTEMP)) { persist_delete(KEY_HIGHTEMP); }
+    persist_write_string(KEY_HIGHTEMP, hightemp_buffer);
+    if (persist_exists(KEY_LOWTEMP)) { persist_delete(KEY_LOWTEMP); }
+    persist_write_string(KEY_LOWTEMP, lowtemp_buffer);
+    if (persist_exists(KEY_TEMP)) { persist_delete(KEY_TEMP); }
+    persist_write_string(KEY_TEMP, temp_buffer);
+    /*
+    for(int i = 1; i <= ppl_total; i++){
+        if (persist_exists(i-1)) { persist_delete(i-1); }
+        persist_write_string(i-1, s_ppl_name[i]);
+        //if (persist_exists(i+9)) { persist_delete(i+9); }
+        persist_write_int(i+9, s_ppl[i]);
+        APP_LOG(APP_LOG_LEVEL_ERROR, s_ppl_name[i]);
+        APP_LOG(APP_LOG_LEVEL_ERROR, &s_ppl[i]);
+    }*/
     window_destroy(s_main_window);
 }
 int main(void) {
