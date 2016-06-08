@@ -115,6 +115,8 @@ static void bluetooth_callback(bool connected) {
 
 static void  deinit_ppl() {
 	for(int i = 1; i <= ppl_total; i++){
+        text_layer_set_text(sa_name_layer[i], "");
+        text_layer_set_background_color(sa_name_layer[i], GColorClear);
 		text_layer_destroy(sa_name_layer[i]);
 	}
 }
@@ -474,7 +476,7 @@ static void main_window_unload(Window *window) {
 	text_layer_destroy(s_date_layer);
 
 	deinit_ppl();
-
+    text_layer_destroy(s_people_layer);
 	text_layer_destroy(s_temp_layer);
 	text_layer_destroy(s_cond_layer);
 	text_layer_destroy(s_hilo_layer);
@@ -581,3 +583,4 @@ int main(void) {
 	app_event_loop();
 	deinit();
 }
+
