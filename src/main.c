@@ -5,27 +5,35 @@
 #define KEY_NAME3 2
 #define KEY_NAME4 3
 #define KEY_NAME5 4
-#define KEY_TEMP 17
-#define KEY_HIGHTEMP 5
-#define KEY_LOWTEMP 6
-#define KEY_COND 7
+#define KEY_NAME6 5
+#define KEY_NAME7 6
+#define KEY_NAME8 7
 #define KEY_BATT 8
-#define KEY_PPL_TOTAL 9
 #define KEY_VALUE1 10
 #define KEY_VALUE2 11
 #define KEY_VALUE3 12
 #define KEY_VALUE4 13
 #define KEY_VALUE5 14
-#define KEY_PPL 15
-#define KEY_REFRESH 16
-#define KEY_VIBRATE 18
-#define KEY_PCOND 19
+#define KEY_VALUE6 15
+#define KEY_VALUE7 16
+#define KEY_VALUE8 17
+#define KEY_PCOND 28
+#define KEY_HIGHTEMP 20
+#define KEY_LOWTEMP 21
+#define KEY_COND 22
+#define KEY_PPL_TOTAL 23
+#define KEY_PPL 24
+#define KEY_REFRESH 25
+#define KEY_TEMP 26
+#define KEY_VIBRATE 27
 /*json file looks like
   {A":"1", "B":"1", "C":"0", D":"0"}
   */
 static bool s_vibrate;
 static int s_interval;
-static int block_size = 30;
+static int block_height = 30;
+//default
+static int block_width = 30;
 static int ppl_total;
 static Window *s_main_window;
 static TextLayer *s_time_layer;
@@ -57,6 +65,11 @@ static char temp_buffer[6];
 static char hilo_buffer[16];
 static char hightemp_buffer[6];
 static char lowtemp_buffer[6];
+
+static void set_block_width(){
+    //simple 1 pixel border
+    block_width = (s_sizew-ppl_total-1)/ppl_total;
+}
 
 static void set_all_text_layer(GColor color) {
 	text_layer_set_text_color(s_time_layer, COLOR_FALLBACK(color, GColorWhite));
@@ -131,17 +144,17 @@ static void create_ppl_layer(TextLayer *s_name_layer) {
 
 static int get_ppl_pos(double pos) {
 	int unit_size = s_sizew / ppl_total;
-	int gap_size = (unit_size - block_size)/2;
-	int rpos = s_sizew/ppl_total * pos - block_size - gap_size;
+	int gap_size = (unit_size - block_width)/2;
+	int rpos = s_sizew/ppl_total * pos - block_width - gap_size;
 	return rpos;
 }
 
 static void create_ppl() {
+    set_block_width();
 	for(int i = 1; i <= ppl_total; i++){
-
 		//s_ppl[i] = 0;
 		sa_name_layer[i] = text_layer_create(
-				GRect(get_ppl_pos(i), 0, block_size, block_size));
+				GRect(get_ppl_pos(i), 0, block_width, block_height));
 		create_ppl_layer(sa_name_layer[i]);
 		layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(sa_name_layer[i]));
 		setup_ppl_char(i, s_ppl_name[i], s_ppl[i], sa_name_layer[i], false);
@@ -183,6 +196,15 @@ static void set_colors() {
 	text_layer_set_text(s_cond_layer, s_cond);
 	window_set_background_color(s_main_window, COLOR_FALLBACK(bg, bwbg));
 	set_all_text_layer(text);
+    for(int i = 1; i <= ppl_total; i++){
+        if (strcmp(s_ppl[i], "0")==0){
+            text_layer_set_background_color(sa_name_layer[i], COLOR_FALLBACK(bg, GColorWhite));
+            text_layer_set_text_color(sa_name_layer[i], text);
+        } else {
+            text_layer_set_background_color(sa_name_layer[i], COLOR_FALLBACK(text, bwbg));
+            text_layer_set_text_color(sa_name_layer[i], bg);
+        }
+    }
 }
 
 static void set_cond_color(char *cond_buffer) {
@@ -338,17 +360,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 		if (strcmp(s_cond, s_prev_cond)!=0) {
 			APP_LOG(APP_LOG_LEVEL_INFO, "set colors");
 			set_colors();
-
-
-			for(int i = 1; i <= ppl_total; i++){
-				if (strcmp(s_ppl[i], "0")==0){
-					text_layer_set_background_color(sa_name_layer[i], COLOR_FALLBACK(bg, GColorWhite));
-					text_layer_set_text_color(sa_name_layer[i], text);
-				} else {
-					text_layer_set_background_color(sa_name_layer[i], COLOR_FALLBACK(text, bwbg));
-					text_layer_set_text_color(sa_name_layer[i], bg);
-				}
-			}
 		}
 	}
 
@@ -405,7 +416,7 @@ static void main_window_load(Window *window) {
 	text_layer_set_font(s_date_layer, s_people_font);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
 	//create People Layer
-	s_people_layer = text_layer_create(GRect(0, 138, bounds.size.w, block_size));
+	s_people_layer = text_layer_create(GRect(0, 138, bounds.size.w, block_height));
 	text_layer_set_background_color(s_people_layer, GColorClear);
 	text_layer_set_text_color(s_people_layer, text);
 	text_layer_set_text_alignment(s_people_layer, GTextAlignmentCenter);
@@ -583,4 +594,3 @@ int main(void) {
 	app_event_loop();
 	deinit();
 }
-
