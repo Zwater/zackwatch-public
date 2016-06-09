@@ -42,17 +42,6 @@
         "resources": {
             "media": [
                 {
-                    "file": "images/SS_4",
-                    "name": "IMAGE_SS_4",
-                    "spaceOptimization": "storage",
-                    "storageFormat": "png",
-                    "targetPlatforms": [
-                        "aplite",
-                        "basalt"
-                    ],
-                    "type": "bitmap"
-                },
-                {
                     "characterRegex": "[ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789!\"#$%^&'()*+]",
                     "file": "fonts/Meteocons",
                     "name": "FONT_METEOCONS_35",
