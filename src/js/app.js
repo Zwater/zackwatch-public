@@ -13,6 +13,9 @@ var metric = localStorage.getItem('metric');
 var ppl_disable = localStorage.getItem('ppldisable');
 var refresh = localStorage.getItem('refresh');
 var vibration = localStorage.getItem('vibration');
+var ppl_dict = localStorage.getItem('ppl_dict');
+var weather_dict = localStorage.getItem('weather_dict');
+var watch_dict = localStorage.getItem('watch_dict');
 
 //var curl = 'http://zwater.no-ip.org/appconfig.html';
 var curl = 'http://daktak.github.io/zackwatch-config/';
@@ -25,6 +28,15 @@ var xhrRequest = function(url, type, callback) {
   xhr.open(type, url);
   xhr.send();
 };
+
+function clone(obj) {
+    if (null === obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+    }
+    return copy;
+}
 
 function convert(val) {
   var out = val;
@@ -52,6 +64,7 @@ function getPeople(latitude, longitude, weather) {
     xhrRequest(mypplurl, 'GET',
       function(responseText) {
         var ppljson = JSON.parse(responseText);
+
         var dictionary = {};
         for (var i=0; i<Object.keys(ppljson).length; i++) {
           var name = Object.keys(ppljson)[i];
@@ -61,18 +74,22 @@ function getPeople(latitude, longitude, weather) {
           console.log(name + ':' + val);
         }
         dictionary.KEY_PPL_TOTAL = ""+Object.keys(ppljson).length;
-        console.log('got people');
-  
-        //console.log(dictionary);
-        Pebble.sendAppMessage(dictionary,
-          function(e) {
-            console.log('People info sent to Pebble successfully!');
-          },
-  
-          function(e) {
-            console.log('Error sending people info to Pebble!');
-          }
-        );
+        if (JSON.stringify(dictionary)!=ppl_dict) {
+            console.log('got people');
+      
+            //console.log(dictionary);
+            Pebble.sendAppMessage(dictionary,
+              function(e) {
+                console.log('People info sent to Pebble successfully!');
+              },
+      
+              function(e) {
+                console.log('Error sending people info to Pebble!');
+              }
+            );
+            localStorage.ppl_dict = JSON.stringify(clone(dictionary));
+
+        }
       }
     );
   }
@@ -82,7 +99,7 @@ function getPeople(latitude, longitude, weather) {
   // myAPIKey + '/' pos.coords.latitude + ',' + pos.coords.longitude + '?exclude=minutely,hourly,alerts,flags';
   var url = 'https://api.forecast.io/forecast/' +
     myAPIKey + '/' + latitude + ',' + longitude;
-    console.log('url is' + url)
+    console.log('url is' + url);
 
   // Send request to Forecast.io
   xhrRequest(url, 'GET',
@@ -91,13 +108,13 @@ function getPeople(latitude, longitude, weather) {
       console.log(responseText);
       var json = JSON.parse(responseText);
       // Temperature, current, high, and low
-      var temperature = json.currently.temperature;
+      var temperature = parseFloat(json.currently.temperature).toFixed(1);
       console.log('Temperature is ' + temperature);
-      var highTemperature = json.daily.data[0].temperatureMax;
+      var highTemperature = parseFloat(json.daily.data[0].temperatureMax).toFixed(1);
       console.log(' High Temperature is ' + highTemperature);
-      var lowTemperature = json.daily.data[0].temperatureMin;
+      var lowTemperature = parseFloat(json.daily.data[0].temperatureMin).toFixed(1);
       console.log(' High Temperature is ' + lowTemperature);
-      var precip = json.daily.data[0].precipProbability * 100;
+      var precip = Math.round(json.daily.data[0].precipProbability * 100);
       console.log(' Precip Prob is '+ precip);
       // Conditions
       var conditions = json.currently.icon;
@@ -110,16 +127,19 @@ function getPeople(latitude, longitude, weather) {
         "KEY_COND": conditions
         
       };
-      //console.log(dictionary);
-      Pebble.sendAppMessage(dictionary,
-        function(e) {
-          console.log('Weather info sent to Pebble successfully!');
-        },
-
-        function(e) {
-          console.log('Error sending weather info to Pebble!');
-        }
-      );
+      if (JSON.stringify(dictionary)!=weather_dict) {
+          //console.log(dictionary);
+          Pebble.sendAppMessage(dictionary,
+            function(e) {
+              console.log('Weather info sent to Pebble successfully!');
+            },
+    
+            function(e) {
+              console.log('Error sending weather info to Pebble!');
+            }
+          );
+          localStorage.weather_dict = JSON.stringify(clone(dictionary));
+      }
     }
   );
   }
@@ -188,16 +208,19 @@ function send_to_c(){
     "KEY_REFRESH": ""+refresh,
     "KEY_PPL": ""+ppl_disable
   };
-  //console.log(dictionary);
-  Pebble.sendAppMessage(dictionary,
-                        function(e) {
-                          console.log('Config info sent to Pebble successfully!');
-                        },
+    if (JSON.stringify(dictionary)!=watch_dict) {
 
-                        function(e) {
-                          console.log('Error sending config info to Pebble!');
-                        }
-                       );
+      Pebble.sendAppMessage(dictionary,
+                            function(e) {
+                              console.log('Config info sent to Pebble successfully!');
+                            },
+    
+                            function(e) {
+                              console.log('Error sending config info to Pebble!');
+                            }
+                           );
+        localStorage.watch_dict = JSON.stringify(clone(dictionary));
+    }
 }
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage',
