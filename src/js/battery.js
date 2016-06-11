@@ -27,7 +27,7 @@ function Battery_GetData()
       
    var dictionary = 
        {
-          'KEY_BATT': "" + (m_Battery.level * 100)
+          'KEY_BATT': "" + Math.round(m_Battery.level * 100)
           //, 'KEY_BATTERY_STATE': m_Battery.charging ? 1 : 0
        };
     console.log("[JS:BATT] "+(m_Battery.level * 100));
