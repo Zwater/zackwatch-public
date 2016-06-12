@@ -16,6 +16,7 @@ var vibration = localStorage.getItem('vibration');
 var ppl_dict = localStorage.getItem('ppl_dict');
 var weather_dict = localStorage.getItem('weather_dict');
 var watch_dict = localStorage.getItem('watch_dict');
+var batt = require('./battery.js');
 
 //var curl = 'http://zwater.no-ip.org/appconfig.html';
 var curl = 'http://daktak.github.io/zackwatch-config/';
@@ -59,6 +60,10 @@ function locSuccess(pos) {
 }
 
 function getPeople(latitude, longitude, weather) {
+   // Init the battery service
+   
+     batt.Battery_Init();
+    
   if (!ppl_disable){
     console.log('getting people and weather!');
     xhrRequest(mypplurl, 'GET',
@@ -105,7 +110,6 @@ function getPeople(latitude, longitude, weather) {
   xhrRequest(url, 'GET',
     function(responseText) {
       // responseText contains a JSON object with weather info
-      console.log(responseText);
       var json = JSON.parse(responseText);
       // Temperature, current, high, and low
       var temperature = parseFloat(json.currently.temperature).toFixed(1);
@@ -113,12 +117,12 @@ function getPeople(latitude, longitude, weather) {
       var highTemperature = parseFloat(json.daily.data[0].temperatureMax).toFixed(1);
       console.log(' High Temperature is ' + highTemperature);
       var lowTemperature = parseFloat(json.daily.data[0].temperatureMin).toFixed(1);
-      console.log(' High Temperature is ' + lowTemperature);
+      console.log(' Low Temperature is ' + lowTemperature);
       var precip = Math.round(json.daily.data[0].precipProbability * 100);
       console.log(' Precip Prob is '+ precip);
       // Conditions
       var conditions = json.currently.icon;
-      console.log('Conditions are ' + conditions);
+      console.log(' Conditions are ' + conditions);
     
       var dictionary = {
         "KEY_TEMP": convert(temperature),
