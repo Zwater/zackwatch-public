@@ -40,11 +40,10 @@ function clone(obj) {
 }
 
 function convert(val) {
-  var out = val;
   if (metric) {
-    out = (val-32)/1.8;
+    val = (val-32)/1.8;
   }
-  return out;
+  return Math.round(val);
 }
 
 function locFailure() {
