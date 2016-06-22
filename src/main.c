@@ -412,7 +412,7 @@ static void main_window_load(Window *window) {
 	GRect bounds = layer_get_bounds(window_layer);
 	s_sizew = PBL_IF_ROUND_ELSE(130, bounds.size.w);
 	s_time_layer = text_layer_create(
-			GRect(0, PBL_IF_ROUND_ELSE(0, -22), bounds.size.w, 75));
+			GRect(0, PBL_IF_ROUND_ELSE(0, -22), bounds.size.w, PBL_IF_ROUND_ELSE(75, 80)));
 	text_layer_set_background_color(s_time_layer, GColorClear);
 	//text_layer_set_text_color(s_time_layer, GColorWhite);
 	text_layer_set_text(s_time_layer, "00:00");
@@ -428,7 +428,7 @@ static void main_window_load(Window *window) {
 	// Add it as a child layer to the Window's root layer
 	layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
 	// Create date TextLayer
-	s_date_layer = text_layer_create(GRect(0, PBL_IF_ROUND_ELSE(68, 50), bounds.size.w, 30));
+	s_date_layer = text_layer_create(GRect(0, PBL_IF_ROUND_ELSE(68, 55), bounds.size.w, 30));
 	//text_layer_set_text_color(s_date_layer, GColorWhite);
 	text_layer_set_background_color(s_date_layer, GColorClear);
 	text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
