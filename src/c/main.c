@@ -26,14 +26,16 @@
 #define KEY_REFRESH 25
 #define KEY_TEMP 26
 #define KEY_VIBRATE 27
+
 /*json file looks like
   {A":"1", "B":"1", "C":"0", D":"0"}
   */
 static bool s_vibrate;
+
 static int s_interval;
 static int block_height = 30;
 //default
-static int block_width = 30;
+static int block_width = PBL_IF_ROUND_ELSE(20,30);
 static int ppl_total;
 static Window *s_main_window;
 static TextLayer *s_time_layer;
@@ -45,6 +47,7 @@ static TextLayer *s_cond_layer;
 static TextLayer *s_hilo_layer;
 static TextLayer *s_batt_layer;
 static TextLayer *s_shit_layer;
+static TextLayer *s_weather_layer;
 static GFont s_time_font;
 static GFont s_people_font;
 static GFont s_weather_font;
@@ -134,11 +137,26 @@ static void  deinit_ppl() {
 	}
 }
 
-static void create_ppl_layer(TextLayer *s_name_layer) {
+static void create_ppl_layer(TextLayer *s_name_layer, int num) {
 	text_layer_set_background_color(s_name_layer, GColorBlack);
 	text_layer_set_text_color(s_name_layer, GColorWhite);
-	text_layer_set_text_alignment(s_name_layer, GTextAlignmentCenter);
-	text_layer_set_text(s_name_layer, "");
+/*#if defined(PBL_ROUND)
+        printf("We're running on a round display");
+        if(num == 1) {
+          printf("first");
+          text_layer_set_text_alignment(s_name_layer, GTextAlignmentRight);
+        }
+        else if(num == ppl_total) {
+          printf("last");
+          text_layer_set_text_alignment(s_name_layer, GTextAlignmentLeft);
+        }
+        else {
+          text_layer_set_text_alignment(s_name_layer, GTextAlignmentCenter);
+        };
+#elif defined(PBL_RECT)*/
+    text_layer_set_text_alignment(s_name_layer, GTextAlignmentCenter);
+//#endif
+    text_layer_set_text(s_name_layer, "");
 	text_layer_set_font(s_name_layer, s_people_font);
 }
 
@@ -155,7 +173,7 @@ static void create_ppl() {
 		//s_ppl[i] = 0;
 		sa_name_layer[i] = text_layer_create(
 				GRect(get_ppl_pos(i), 0, block_width, block_height));
-		create_ppl_layer(sa_name_layer[i]);
+        create_ppl_layer(sa_name_layer[i], i);
 		layer_add_child(text_layer_get_layer(s_people_layer), text_layer_get_layer(sa_name_layer[i]));
 		setup_ppl_char(i, s_ppl_name[i], s_ppl[i], sa_name_layer[i], false);
 	}
@@ -392,68 +410,76 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 static void main_window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
-	s_sizew = bounds.size.w;
+	s_sizew = PBL_IF_ROUND_ELSE(130, bounds.size.w);
 	s_time_layer = text_layer_create(
-			GRect(0, 0, bounds.size.w, 80));
+			GRect(0, 0, bounds.size.w, PBL_IF_ROUND_ELSE(75, 80)));
 	text_layer_set_background_color(s_time_layer, GColorClear);
 	//text_layer_set_text_color(s_time_layer, GColorWhite);
 	text_layer_set_text(s_time_layer, "00:00");
 	text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 	// Create Fonts
-	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_DIN_40));
+	s_time_font = fonts_load_custom_font(resource_get_handle(PBL_IF_ROUND_ELSE(RESOURCE_ID_FONT_DIN_40, RESOURCE_ID_FONT_DIN_40)));
 	s_people_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_DIN_BOLD_25));
 	s_dinsmall_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_DIN_20));
 	s_weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_METEOCONS_35));
 	s_batt_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_DIN_15));
+    
 	text_layer_set_font(s_time_layer, s_time_font);
 	// Add it as a child layer to the Window's root layer
 	layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
 	// Create date TextLayer
-	s_date_layer = text_layer_create(GRect(0, 55, bounds.size.w, 30));
+	s_date_layer = text_layer_create(GRect(0, PBL_IF_ROUND_ELSE(68, 55), bounds.size.w, 30));
 	//text_layer_set_text_color(s_date_layer, GColorWhite);
 	text_layer_set_background_color(s_date_layer, GColorClear);
 	text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
 	text_layer_set_font(s_date_layer, s_people_font);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
 	//create People Layer
-	s_people_layer = text_layer_create(GRect(0, 138, bounds.size.w, block_height));
+	s_people_layer = text_layer_create(GRect(PBL_IF_ROUND_ELSE(25, 0), 138, bounds.size.w, block_height));
 	text_layer_set_background_color(s_people_layer, GColorClear);
+    text_layer_set_text_alignment(s_people_layer, GTextAlignmentCenter);
 	text_layer_set_text_color(s_people_layer, text);
-	text_layer_set_text_alignment(s_people_layer, GTextAlignmentCenter);
 	text_layer_set_text(s_people_layer, "");
 	text_layer_set_font(s_people_layer, s_people_font);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_people_layer));
 	if (ppl_total != 0) {
 		create_ppl();
 	}
-
+    //Create Weather Layer. Makes stuff easier.
+    s_weather_layer = text_layer_create(GRect(0,PBL_IF_ROUND_ELSE(80, 70), bounds.size.w, 65));
+	text_layer_set_background_color(s_weather_layer, GColorClear);
+	text_layer_set_text_color(s_weather_layer, text);
+	text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
+	text_layer_set_text(s_weather_layer, "");
+	text_layer_set_font(s_weather_layer, s_people_font);
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
 	//create temperature Layer
 	s_temp_layer = text_layer_create(
-			GRect(10, 90, 50, 30));
+			GRect(PBL_IF_ROUND_ELSE(25, 10), 18, 50, 30));
 	text_layer_set_background_color(s_temp_layer, GColorClear);
 	//text_layer_set_text_color(s_temp_layer, GColorWhite);
 	text_layer_set_text_alignment(s_temp_layer, GTextAlignmentLeft);
 	text_layer_set_text(s_temp_layer, temp_buffer);
 	text_layer_set_font(s_temp_layer, s_people_font);
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_temp_layer));
+	layer_add_child(text_layer_get_layer(s_weather_layer), text_layer_get_layer(s_temp_layer));
 	//create conditions Layer
 	s_cond_layer = text_layer_create(
-			GRect(47, 88, 50, 50));
+			GRect(PBL_IF_ROUND_ELSE(65, 47), 16, 50, 50));
 	text_layer_set_background_color(s_cond_layer, GColorClear);
 	//text_layer_set_text_color(s_cond_layer, GColorWhite);
 	text_layer_set_text_alignment(s_cond_layer, GTextAlignmentCenter);
 	text_layer_set_text(s_cond_layer, s_cond);
 	text_layer_set_font(s_cond_layer, s_weather_font);
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_cond_layer));
+	layer_add_child(text_layer_get_layer(s_weather_layer), text_layer_get_layer(s_cond_layer));
 	//create high/low temp Layer
 	s_hilo_layer = text_layer_create(
-			GRect(93, 85, 50, 60));
+			GRect(PBL_IF_ROUND_ELSE(115, 93), 12, 50, 60));
 	text_layer_set_background_color(s_hilo_layer, GColorClear);
 	//text_layer_set_text_color(s_hilo_layer, GColorWhite);
 	text_layer_set_text_alignment(s_hilo_layer, GTextAlignmentCenter);
 	text_layer_set_text(s_hilo_layer, hilo_buffer);
 	text_layer_set_font(s_hilo_layer, s_dinsmall_font);
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_hilo_layer));
+	layer_add_child(text_layer_get_layer(s_weather_layer), text_layer_get_layer(s_hilo_layer));
 	//create battery Layer
 	s_batt_layer = text_layer_create(
 			GRect(53, 5, 40, 20));
@@ -493,6 +519,7 @@ static void main_window_unload(Window *window) {
 	text_layer_destroy(s_hilo_layer);
 	text_layer_destroy(s_batt_layer);
 	text_layer_destroy(s_shit_layer);
+    text_layer_destroy(s_weather_layer);
 }
 
 static void get_values() {

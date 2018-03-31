@@ -57,15 +57,14 @@
                     "type": "font"
                 },
                 {
-                    "characterRegex": "[0-9\u00b0| ]",
-                    "file": "fonts/DIN_1451_Engschrift_20_Numbers",
-                    "name": "FONT_DIN_20",
+                    "file": "fonts/DIN_1451_Engschrift_15",
+                    "name": "FONT_DIN_15",
                     "targetPlatforms": null,
                     "type": "font"
                 },
                 {
-                    "file": "fonts/DIN_1451_Engschrift_15",
-                    "name": "FONT_DIN_15",
+                    "file": "fonts/DIN_1451_Engschrift",
+                    "name": "FONT_DIN_20",
                     "targetPlatforms": null,
                     "type": "font"
                 },
@@ -81,12 +80,13 @@
         "sdkVersion": "3",
         "targetPlatforms": [
             "aplite",
-            "basalt"
+            "basalt",
+            "chalk"
         ],
         "uuid": "a10373ad-eca3-4666-80a3-f8069e2ae4eb",
         "watchapp": {
             "watchface": true
         }
     },
-    "version": "1.3.0"
+    "version": "1.4.0"
 }
