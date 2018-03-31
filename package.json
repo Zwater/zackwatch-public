@@ -1,6 +1,8 @@
 {
     "author": "zachary.waser@gmail.com",
-    "dependencies": {},
+    "dependencies": {
+        "pebble-clay": "^1.0.2"
+    },
     "keywords": [],
     "name": "zack_watchface",
     "pebble": {
@@ -70,7 +72,7 @@
                 {
                     "characterRegex": "[0-9:.]",
                     "file": "fonts/DIN_1451_Engschrift",
-                    "name": "FONT_DIN_80",
+                    "name": "FONT_DIN_40",
                     "targetPlatforms": null,
                     "type": "font"
                 }
