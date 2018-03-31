@@ -1,3 +1,12 @@
+/*jslint sub: true*/
+
+// Import the Clay package
+var Clay = require('pebble-clay');
+// Load our Clay configuration file
+var clayConfig = require('./config');
+// Initialize Clay
+var clay = new Clay(clayConfig);
+
 /*json file looks like
 {"A":"1", "B":"1", "C":"0", D":"0"}
 up to 4 entries, remove any not required ie
