@@ -18,7 +18,7 @@ var mypplurl = localStorage.getItem('ppl');
 var latitude = localStorage.getItem('latitude');
 var longitude = localStorage.getItem('longitude');
 var defaultlocOnly = Boolean(localStorage.getItem('defaultlocOnly') == "True");
-var metric = localStorage.getItem('metric');
+var metric = Boolean(localStorage.getItem('metric') == "True");
 var ppl_disable = localStorage.getItem('ppldisable');
 var refresh = localStorage.getItem('refresh');
 var vibration = localStorage.getItem('vibration');
