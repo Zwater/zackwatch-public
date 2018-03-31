@@ -5,50 +5,55 @@ module.exports = [
     },
     {
         "type": "toggle",
-        "messageKey": "",
+        "messageKey": "metric",
         "label": "Celcius"
-    }
+    },
     {
         "type": "input",
-        "messageKey": "",
+        "messageKey": "apikey",
         "label": "Forcast.IO API Key"
     },
     {
         "type": "toggle",
-        "messageKey": "",
+        "messageKey": "defaultLocOnly",
         "label":"Use Provided Lat & Long"
     },
     {
         "type": "input",
-        "messageKey": "",
+        "messageKey": "latitude",
         "label": "Latitude"
     },
     {
         "type": "input",
-        "messageKey": "",
+        "messageKey": "longitude",
         "label": "Longitude"
     },
     {
         "type": "slider",
-        "messageKey": "",
+        "messageKey": "refresh",
         "label": "Refresh Interval",
         "defaultValue": "10"
     },
     {
         "type": "toggle",
-        "messageKey": "",
+        "messageKey": "ppldisable",
         "label": "Hide Weasley Clock",
         "defaultValue": true
     },
     {
+        "type": "input",
+        "messageKey": "ppl",
+        "label": "JSON URL"
+    },
+    {
         "type": "toggle",
-        "mesageKey": "",
-        "label": "Vibrate",
+        "messageKey": "vibrate",
+        "label": "Vibration",
         "defaultValue": true
     },
     {
-        "type": "input",
-        "messageKey": "",
-        "label": "JSON URL"
+        "type": "submit",
+        "defaultValue": "Save Settings"
     }
-]
+    
+];

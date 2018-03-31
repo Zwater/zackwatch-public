@@ -400,7 +400,7 @@ static void main_window_load(Window *window) {
 	text_layer_set_text(s_time_layer, "00:00");
 	text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 	// Create Fonts
-	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_DIN_80));
+	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_DIN_40));
 	s_people_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_DIN_BOLD_25));
 	s_dinsmall_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_DIN_20));
 	s_weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_METEOCONS_35));
