@@ -57,14 +57,14 @@
                     "type": "font"
                 },
                 {
-                    "file": "fonts/DIN_1451_Engschrift",
-                    "name": "FONT_DIN_20",
+                    "file": "fonts/DIN_1451_Engschrift_15",
+                    "name": "FONT_DIN_15",
                     "targetPlatforms": null,
                     "type": "font"
                 },
                 {
-                    "file": "fonts/DIN_1451_Engschrift_15",
-                    "name": "FONT_DIN_15",
+                    "file": "fonts/DIN_1451_Engschrift",
+                    "name": "FONT_DIN_20",
                     "targetPlatforms": null,
                     "type": "font"
                 },
@@ -73,13 +73,6 @@
                     "file": "fonts/DIN_1451_Engschrift",
                     "name": "FONT_DIN_40",
                     "targetPlatforms": null,
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9:.]",
-                    "file": "fonts/DIN_1451_Engschrift",
-                    "name": "FONT_DIN_70",
-                    "targetPlatforms": "chalk",
                     "type": "font"
                 }
             ]

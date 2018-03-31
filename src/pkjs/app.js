@@ -17,8 +17,8 @@ var myAPIKey = localStorage.getItem('apikey');
 var mypplurl = localStorage.getItem('ppl');
 var latitude = localStorage.getItem('latitude');
 var longitude = localStorage.getItem('longitude');
-var defaultlocOnly = Boolean(localStorage.getItem('defaultlocOnly') == "True");
-var metric = Boolean(localStorage.getItem('metric') == "True");
+var defaultlocOnly = localStorage.getItem('defaultlocOnly');
+var metric = localStorage.getItem('metric');
 var ppl_disable = localStorage.getItem('ppldisable');
 var refresh = localStorage.getItem('refresh');
 var vibration = localStorage.getItem('vibration');
@@ -116,18 +116,28 @@ function getPeople(latitude, longitude, weather) {
     function(responseText) {
       // responseText contains a JSON object with weather info
       var json = JSON.parse(responseText);
-      // Temperature, current, high, and low
-      var temperature = parseFloat(json.currently.temperature).toFixed(1);
-      console.log('Temperature is ' + temperature);
-      var highTemperature = parseFloat(json.daily.data[0].temperatureMax).toFixed(1);
-      console.log(' High Temperature is ' + highTemperature);
-      var lowTemperature = parseFloat(json.daily.data[0].temperatureMin).toFixed(1);
-      console.log(' Low Temperature is ' + lowTemperature);
-      var precip = Math.round(json.daily.data[0].precipProbability * 100);
-      console.log(' Precip Prob is '+ precip);
+      var temperature = null;
+      var highTemperature = null;
+      var lowTemperature = null;
+      var precip = null;
+      var conditions = null;
+      if(typeof json.currently != "undefined"){
+          // Temperature, current, high, and low
+          temperature = parseFloat(json.currently.temperature).toFixed(1);
+          console.log('Temperature is ' + temperature);        
+          conditions = json.currently.icon;
+          console.log(' Conditions are ' + conditions);
+      }
+      if (typeof json.daily != "undefined"){
+      if (typeof json.daily.data[0] != "undefined"){
+          highTemperature = parseFloat(json.daily.data[0].temperatureMax).toFixed(1);
+          console.log(' High Temperature is ' + highTemperature);
+          lowTemperature = parseFloat(json.daily.data[0].temperatureMin).toFixed(1);
+          console.log(' Low Temperature is ' + lowTemperature);
+          precip = Math.round(json.daily.data[0].precipProbability * 100);
+          console.log(' Precip Prob is '+ precip);
+      }}
       // Conditions
-      var conditions = json.currently.icon;
-      console.log(' Conditions are ' + conditions);
     
       var dictionary = {
         "KEY_TEMP": convert(temperature),
@@ -136,6 +146,7 @@ function getPeople(latitude, longitude, weather) {
         "KEY_COND": conditions
         
       };
+      
       if (JSON.stringify(dictionary)!=weather_dict) {
           //console.log(dictionary);
           Pebble.sendAppMessage(dictionary,
@@ -149,6 +160,7 @@ function getPeople(latitude, longitude, weather) {
           );
           localStorage.weather_dict = JSON.stringify(clone(dictionary));
       }
+      
     }
   );
   }
