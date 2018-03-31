@@ -394,7 +394,7 @@ static void main_window_load(Window *window) {
 	GRect bounds = layer_get_bounds(window_layer);
 	s_sizew = bounds.size.w;
 	s_time_layer = text_layer_create(
-			GRect(0, -22, bounds.size.w, 80));
+			GRect(0, 0, bounds.size.w, 80));
 	text_layer_set_background_color(s_time_layer, GColorClear);
 	//text_layer_set_text_color(s_time_layer, GColorWhite);
 	text_layer_set_text(s_time_layer, "00:00");

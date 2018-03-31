@@ -4,6 +4,13 @@ module.exports = [
         "defaultValue": "ZackWatch Configuration"
     },
     {
+        "type": "section",
+        "items": [ 
+        {
+        "type": "heading",
+        "defaultValue": "Watch Settings"
+    },
+    {
         "type": "toggle",
         "messageKey": "metric",
         "label": "Celcius"
@@ -33,7 +40,14 @@ module.exports = [
         "messageKey": "refresh",
         "label": "Refresh Interval",
         "defaultValue": "10"
-    },
+    }]
+},
+    { "type": "section",
+     "items": [
+         {
+             "type": "heading",
+             "defaultValue": "Weasley Settings"
+         },
     {
         "type": "toggle",
         "messageKey": "ppldisable",
@@ -51,6 +65,7 @@ module.exports = [
         "label": "Vibration",
         "defaultValue": true
     },
+     ]},
     {
         "type": "submit",
         "defaultValue": "Save Settings"
