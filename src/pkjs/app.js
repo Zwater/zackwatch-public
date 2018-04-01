@@ -1,3 +1,12 @@
+/*jslint sub: true*/
+
+// Import the Clay package
+var Clay = require('pebble-clay');
+// Load our Clay configuration file
+var clayConfig = require('./config');
+// Initialize Clay
+var clay = new Clay(clayConfig);
+
 /*json file looks like
 {"A":"1", "B":"1", "C":"0", D":"0"}
 up to 4 entries, remove any not required ie
@@ -8,8 +17,8 @@ var myAPIKey = localStorage.getItem('apikey');
 var mypplurl = localStorage.getItem('ppl');
 var latitude = localStorage.getItem('latitude');
 var longitude = localStorage.getItem('longitude');
-var defaultlocOnly = Boolean(localStorage.getItem('defaultlocOnly') == "True");
-var metric = Boolean(localStorage.getItem('metric') == "True");
+var defaultlocOnly = localStorage.getItem('defaultlocOnly');
+var metric = localStorage.getItem('metric');
 var ppl_disable = localStorage.getItem('ppldisable');
 var refresh = localStorage.getItem('refresh');
 var vibration = localStorage.getItem('vibration');
@@ -17,9 +26,6 @@ var ppl_dict = localStorage.getItem('ppl_dict');
 var weather_dict = localStorage.getItem('weather_dict');
 var watch_dict = localStorage.getItem('watch_dict');
 var batt = require('./battery.js');
-
-//var curl = 'http://zwater.no-ip.org/appconfig.html';
-var curl = 'http://daktak.github.io/zackwatch-config/';
 
 var xhrRequest = function(url, type, callback) {
   var xhr = new XMLHttpRequest();
@@ -97,7 +103,7 @@ function getPeople(latitude, longitude, weather) {
       }
     );
   }
-  if (weather) {
+  if (weather && myAPIKey != null) {
   // Construct URL
   //var url = 'https://api.forecast.io/forecast/' +
   // myAPIKey + '/' pos.coords.latitude + ',' + pos.coords.longitude + '?exclude=minutely,hourly,alerts,flags';
@@ -110,18 +116,28 @@ function getPeople(latitude, longitude, weather) {
     function(responseText) {
       // responseText contains a JSON object with weather info
       var json = JSON.parse(responseText);
-      // Temperature, current, high, and low
-      var temperature = parseFloat(json.currently.temperature).toFixed(1);
-      console.log('Temperature is ' + temperature);
-      var highTemperature = parseFloat(json.daily.data[0].temperatureMax).toFixed(1);
-      console.log(' High Temperature is ' + highTemperature);
-      var lowTemperature = parseFloat(json.daily.data[0].temperatureMin).toFixed(1);
-      console.log(' Low Temperature is ' + lowTemperature);
-      var precip = Math.round(json.daily.data[0].precipProbability * 100);
-      console.log(' Precip Prob is '+ precip);
+      var temperature = null;
+      var highTemperature = null;
+      var lowTemperature = null;
+      var precip = null;
+      var conditions = null;
+      if(typeof json.currently != "undefined"){
+          // Temperature, current, high, and low
+          temperature = parseFloat(json.currently.temperature).toFixed(1);
+          console.log('Temperature is ' + temperature);        
+          conditions = json.currently.icon;
+          console.log(' Conditions are ' + conditions);
+      }
+      if (typeof json.daily != "undefined"){
+      if (typeof json.daily.data[0] != "undefined"){
+          highTemperature = parseFloat(json.daily.data[0].temperatureMax).toFixed(1);
+          console.log(' High Temperature is ' + highTemperature);
+          lowTemperature = parseFloat(json.daily.data[0].temperatureMin).toFixed(1);
+          console.log(' Low Temperature is ' + lowTemperature);
+          precip = Math.round(json.daily.data[0].precipProbability * 100);
+          console.log(' Precip Prob is '+ precip);
+      }}
       // Conditions
-      var conditions = json.currently.icon;
-      console.log(' Conditions are ' + conditions);
     
       var dictionary = {
         "KEY_TEMP": convert(temperature),
@@ -130,6 +146,7 @@ function getPeople(latitude, longitude, weather) {
         "KEY_COND": conditions
         
       };
+      
       if (JSON.stringify(dictionary)!=weather_dict) {
           //console.log(dictionary);
           Pebble.sendAppMessage(dictionary,
@@ -143,6 +160,7 @@ function getPeople(latitude, longitude, weather) {
           );
           localStorage.weather_dict = JSON.stringify(clone(dictionary));
       }
+      
     }
   );
   }
@@ -176,30 +194,27 @@ Pebble.addEventListener('ready',
     getWeather();
   }
 );
-Pebble.addEventListener('showConfiguration', function() {
-  console.log('Showing configuration page: ' + curl);
-
-  Pebble.openURL(curl);
-});
 
 Pebble.addEventListener('webviewclosed', function(e) {
-  var configData = JSON.parse(decodeURIComponent(e.response));
-  console.log('Configuration page returned: ' + JSON.stringify(configData));
-  mypplurl = configData.ppl;
-  myAPIKey = configData.apikey;
-  metric = configData.metric;
-  longitude = configData.longitude;
-  latitude = configData.latitude;
-  defaultlocOnly = configData.defaultlocOnly;
-  refresh = configData.refresh;
-  vibration = configData.vibration;
-  ppl_disable = configData.ppl_disable;
+  var claySettings = clay.getSettings(e.response, false);
+  console.log('String:' + JSON.stringify(claySettings));
+    
+  mypplurl = claySettings.ppl.value;
+  myAPIKey = claySettings.apikey.value;
+  metric = claySettings.metric.value;
+  longitude = claySettings.longitude.value;
+  latitude = claySettings.latitude.value;
+  defaultlocOnly = claySettings.defaultLocOnly.value;
+  refresh = claySettings.refresh.value;
+  vibration = claySettings.vibrate.value;
+  ppl_disable = claySettings.ppldisable.value;
   localStorage.apikey = myAPIKey;
   localStorage.ppl = mypplurl;
   localStorage.metric = metric;
   localStorage.longitude = longitude;
   localStorage.latitude = latitude;
   localStorage.defaultlocOnly = defaultlocOnly;
+  console.log("API: " + myAPIKey);
   send_to_c();
   getWeather();
 
