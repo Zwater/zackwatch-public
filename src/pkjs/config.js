@@ -40,6 +40,12 @@ module.exports = [
             "messageKey": "refresh",
             "label": "Refresh Interval",
             "defaultValue": "10"
+        },
+        {
+            "type": "toggle",
+            "messageKey": "phonebatt",
+            "label": "Show phone battery percentage",
+            "defaultValue": true
         }
         ]
     },

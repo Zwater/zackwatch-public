@@ -25,6 +25,7 @@ var vibration = localStorage.getItem('vibration');
 var ppl_dict = localStorage.getItem('ppl_dict');
 var weather_dict = localStorage.getItem('weather_dict');
 var watch_dict = localStorage.getItem('watch_dict');
+var phone_batt = localStorage.getItem('phone_batt');
 var batt = require('./battery.js');
 
 var xhrRequest = function(url, type, callback) {
@@ -65,10 +66,12 @@ function locSuccess(pos) {
 }
 
 function getPeople(latitude, longitude, weather) {
+
    // Init the battery service
-
-     batt.Battery_Init();
-
+  if (phone_batt) {
+      batt.Battery_Init();
+  }
+    
   if (!ppl_disable){
     console.log('getting people and weather!');
     xhrRequest(mypplurl, 'GET',
@@ -197,24 +200,32 @@ Pebble.addEventListener('ready',
 
 Pebble.addEventListener('webviewclosed', function(e) {
   var claySettings = clay.getSettings(e.response, false);
-  console.log('String:' + JSON.stringify(claySettings));
 
-  mypplurl = claySettings.ppl.value;
+  
   myAPIKey = claySettings.apikey.value;
   metric = claySettings.metric.value;
-  longitude = claySettings.longitude.value;
-  latitude = claySettings.latitude.value;
+
   defaultlocOnly = claySettings.defaultLocOnly.value;
+  if (defaultlocOnly) {
+      longitude = claySettings.longitude.value;
+      latitude = claySettings.latitude.value;
+      localStorage.longitude = longitude;
+      localStorage.latitude = latitude;
+  }
   refresh = claySettings.refresh.value;
   vibration = claySettings.vibrate.value;
   ppl_disable = claySettings.ppldisable.value;
+  if (!ppl_disable) {
+      mypplurl = claySettings.ppl.value;
+      localStorage.ppl = mypplurl;
+  }
+  phone_batt = claySettings.phonebatt;
   localStorage.apikey = myAPIKey;
-  localStorage.ppl = mypplurl;
   localStorage.metric = metric;
-  localStorage.longitude = longitude;
-  localStorage.latitude = latitude;
   localStorage.defaultlocOnly = defaultlocOnly;
-  console.log("API: " + myAPIKey);
+  localStorage.refresh = refresh;
+  localStorage.vibrate = vibration;
+  localStorage.phone_batt = phone_batt;
   send_to_c();
   getWeather();
 
