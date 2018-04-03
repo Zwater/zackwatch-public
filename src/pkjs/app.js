@@ -10,7 +10,7 @@ var clay = new Clay(clayConfig);
 /*json file looks like
 {"A":"1", "B":"1", "C":"0", D":"0"}
 up to 4 entries, remove any not required ie
-{"A":"1"} 
+{"A":"1"}
 */
 
 var myAPIKey = localStorage.getItem('apikey');
@@ -25,6 +25,7 @@ var vibration = localStorage.getItem('vibration');
 var ppl_dict = localStorage.getItem('ppl_dict');
 var weather_dict = localStorage.getItem('weather_dict');
 var watch_dict = localStorage.getItem('watch_dict');
+var phone_batt = localStorage.getItem('phone_batt');
 var batt = require('./battery.js');
 
 var xhrRequest = function(url, type, callback) {
@@ -65,9 +66,11 @@ function locSuccess(pos) {
 }
 
 function getPeople(latitude, longitude, weather) {
+
    // Init the battery service
-   
-     batt.Battery_Init();
+  if (phone_batt) {
+      batt.Battery_Init();
+  }
     
   if (!ppl_disable){
     console.log('getting people and weather!');
@@ -86,13 +89,13 @@ function getPeople(latitude, longitude, weather) {
         dictionary.KEY_PPL_TOTAL = ""+Object.keys(ppljson).length;
         if (JSON.stringify(dictionary)!=ppl_dict) {
             console.log('got people');
-      
+
             //console.log(dictionary);
             Pebble.sendAppMessage(dictionary,
               function(e) {
                 console.log('People info sent to Pebble successfully!');
               },
-      
+
               function(e) {
                 console.log('Error sending people info to Pebble!');
               }
@@ -124,7 +127,7 @@ function getPeople(latitude, longitude, weather) {
       if(typeof json.currently != "undefined"){
           // Temperature, current, high, and low
           temperature = parseFloat(json.currently.temperature).toFixed(1);
-          console.log('Temperature is ' + temperature);        
+          console.log('Temperature is ' + temperature);
           conditions = json.currently.icon;
           console.log(' Conditions are ' + conditions);
       }
@@ -138,29 +141,29 @@ function getPeople(latitude, longitude, weather) {
           console.log(' Precip Prob is '+ precip);
       }}
       // Conditions
-    
+
       var dictionary = {
         "KEY_TEMP": convert(temperature),
         "KEY_HIGHTEMP": convert(highTemperature),
         "KEY_LOWTEMP": convert(lowTemperature),
         "KEY_COND": conditions
-        
+
       };
-      
+
       if (JSON.stringify(dictionary)!=weather_dict) {
           //console.log(dictionary);
           Pebble.sendAppMessage(dictionary,
             function(e) {
               console.log('Weather info sent to Pebble successfully!');
             },
-    
+
             function(e) {
               console.log('Error sending weather info to Pebble!');
             }
           );
           localStorage.weather_dict = JSON.stringify(clone(dictionary));
       }
-      
+
     }
   );
   }
@@ -182,7 +185,7 @@ console.log(defaultlocOnly + ' is ' + typeof defaultlocOnly);
       }
     );
   }
-  
+
 }
 
 // Listen for when the watchface is opened
@@ -197,24 +200,32 @@ Pebble.addEventListener('ready',
 
 Pebble.addEventListener('webviewclosed', function(e) {
   var claySettings = clay.getSettings(e.response, false);
-  console.log('String:' + JSON.stringify(claySettings));
-    
-  mypplurl = claySettings.ppl.value;
+
+  
   myAPIKey = claySettings.apikey.value;
   metric = claySettings.metric.value;
-  longitude = claySettings.longitude.value;
-  latitude = claySettings.latitude.value;
+
   defaultlocOnly = claySettings.defaultLocOnly.value;
+  if (defaultlocOnly) {
+      longitude = claySettings.longitude.value;
+      latitude = claySettings.latitude.value;
+      localStorage.longitude = longitude;
+      localStorage.latitude = latitude;
+  }
   refresh = claySettings.refresh.value;
   vibration = claySettings.vibrate.value;
   ppl_disable = claySettings.ppldisable.value;
+  if (!ppl_disable) {
+      mypplurl = claySettings.ppl.value;
+      localStorage.ppl = mypplurl;
+  }
+  phone_batt = claySettings.phonebatt;
   localStorage.apikey = myAPIKey;
-  localStorage.ppl = mypplurl;
   localStorage.metric = metric;
-  localStorage.longitude = longitude;
-  localStorage.latitude = latitude;
   localStorage.defaultlocOnly = defaultlocOnly;
-  console.log("API: " + myAPIKey);
+  localStorage.refresh = refresh;
+  localStorage.vibrate = vibration;
+  localStorage.phone_batt = phone_batt;
   send_to_c();
   getWeather();
 
@@ -232,7 +243,7 @@ function send_to_c(){
                             function(e) {
                               console.log('Config info sent to Pebble successfully!');
                             },
-    
+
                             function(e) {
                               console.log('Error sending config info to Pebble!');
                             }
