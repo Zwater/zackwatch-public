@@ -63,15 +63,15 @@
                     "type": "font"
                 },
                 {
+                    "characterRegex": "[0-9:.]",
                     "file": "fonts/DIN_1451_Engschrift",
-                    "name": "FONT_DIN_20",
+                    "name": "FONT_DIN_40",
                     "targetPlatforms": null,
                     "type": "font"
                 },
                 {
-                    "characterRegex": "[0-9:.]",
                     "file": "fonts/DIN_1451_Engschrift",
-                    "name": "FONT_DIN_40",
+                    "name": "FONT_DIN_20",
                     "targetPlatforms": null,
                     "type": "font"
                 }
