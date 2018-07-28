@@ -20,7 +20,7 @@ if [ ! -d $HOME/pebble-dev/${PEBBLE_SDK} ]; then
   tar -jxf ${PEBBLE_SDK}.tar.bz2 -C ~/pebble-dev/
   # Install the Python library dependencies locally
   cd ~/pebble-dev/${PEBBLE_SDK}
-  - ~/pebble-dev/${PEBBLE_SDK}/bin/pebble sdk install https://github.com/aveao/PebbleArchive/raw/master/SDKCores/sdk-core-4.3.tar.bz2
+  ~/pebble-dev/${PEBBLE_SDK}/bin/pebble sdk install https://github.com/aveao/PebbleArchive/raw/master/SDKCores/sdk-core-4.3.tar.bz2
   virtualenv --no-site-packages .env
   source .env/bin/activate
   pip install -r requirements.txt
