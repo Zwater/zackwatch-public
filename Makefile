@@ -31,10 +31,22 @@ size:
 logs:
 	pebble logs --emulator $(PEBBLE_EMULATOR)
 
+phone-logs:
+	pebble logs --phone ${PEBBLE_PHONE}
+
 screenshot:
 	pebble screenshot --phone ${PEBBLE_PHONE}
 
 deploy:
 	pebble install --phone ${PEBBLE_PHONE}
 
-.PHONY: all build config log install clean size logs screenshot deploy
+timeline-on:
+	pebble emu-set-timeline-quick-view on
+
+timeline-off:
+	pebble emu-set-timeline-quick-view off
+
+wipe:
+	pebble wipe
+
+.PHONY: all build config log install clean size logs screenshot deploy timeline-on timeline-off wipe phone-logs

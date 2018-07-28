@@ -26,9 +26,9 @@ before_script:
 
 cache:
   paths:
-    - $HOME/pebble-dev
-    - $HOME/.cache/pip
-    
+    - /builds/pebble-dev
+    - /builds/.cache/pip
+
 stages:
   - build
 
@@ -38,4 +38,4 @@ build:
     - make travis_build
   artifacts:
     paths:
-    - /build/
+    - /builds/daktak/zackwatch-public/build
