@@ -3,7 +3,7 @@ image: node:latest
 # Run before each script
 before_script:
   - export PEBBLE_SDK=pebble-sdk-4.5-linux64
-  - export PEBBLE_PATH=daktak/zackwatch-public
+  - export PEBBLE_PATH=Zwater/zackwatch-public
   - export HOME=/builds
   - apt-get -qq update
   - apt-get -qq install -y python2.7 python2.7-dev python-virtualenv python-pip libssl-dev libffi-dev
@@ -38,4 +38,4 @@ build:
     - make travis_build
   artifacts:
     paths:
-    - /builds/daktak/zackwatch-public/build
+    - /builds/Zwater/zackwatch-public/build
