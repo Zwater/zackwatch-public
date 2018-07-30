@@ -23,6 +23,7 @@ before_script:
   - pip install -U pyopenssl==0.13.1 pyasn1 ndg-httpsclient
   - fi
   - cd $HOME/${PEBBLE_PATH}
+  - ~/pebble-dev/${PEBBLE_SDK}/bin/pebble sdk install https://github.com/aveao/PebbleArchive/raw/master/SDKCores/sdk-core-4.3.tar.bz2
 
 cache:
   paths:
