@@ -13,7 +13,7 @@ mkdir -p ~/.pebble-sdk
 touch ~/.pebble-sdk/NO_TRACKING
 
 # Get the Pebble SDK and toolchain
-if [ ! -d $HOME/pebble-dev/${PEBBLE_SDK} ]; then
+#if [ ! -d $HOME/pebble-dev/${PEBBLE_SDK} ]; then
   wget https://developer.rebble.io/s3.amazonaws.com/assets.getpebble.com/pebble-tool/${PEBBLE_SDK}.tar.bz2
 
   # Extract the SDK
@@ -27,4 +27,4 @@ if [ ! -d $HOME/pebble-dev/${PEBBLE_SDK} ]; then
   pip install -r requirements.txt
   deactivate
   ~/pebble-dev/${PEBBLE_SDK}/bin/pebble sdk install https://github.com/aveao/PebbleArchive/raw/master/SDKCores/sdk-core-4.3.tar.bz2
-fi
+#fi
