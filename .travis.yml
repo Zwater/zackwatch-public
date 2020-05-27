@@ -1,7 +1,7 @@
 language: python
+os: linux
 python:
    - 2.7.15
-sudo: false
 before_script: bash ./before_install.sh
 script: make travis_build
 cache:
