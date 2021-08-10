@@ -17,7 +17,7 @@ log:
 	pebble logs --emulator $(PEBBLE_EMULATOR)
 
 travis_build:
-	yes | ~/pebble-dev/${PEBBLE_SDK}/bin/pebble build
+	yes | sdk/bin/pebble build
 
 install:
 	pebble install --emulator $(PEBBLE_EMULATOR)
